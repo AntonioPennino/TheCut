@@ -659,8 +659,11 @@
                 android:paddingVertical="8dp"
                 android:paddingHorizontal="8dp">
 
+                <!-- Text -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -679,12 +682,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_text"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Overlay / PIP -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -703,12 +711,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_overlay"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Draw -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -727,14 +740,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_draw"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
-
-
+                <!-- Audio -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -753,12 +769,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_audio"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Voice -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -777,12 +798,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_voice"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Subtitles -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -801,12 +827,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_subtitles"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Crop -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -825,12 +856,17 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/str_crop"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Canvas -->
                 <LinearLayout
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center">
@@ -849,6 +885,8 @@
                         android:layout_marginTop="4dp"
                         android:text="Canvas"
                         android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
                         android:fontFamily="sans-serif-medium"
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>

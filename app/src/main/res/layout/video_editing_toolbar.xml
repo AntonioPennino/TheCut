@@ -22,7 +22,9 @@
 
         <!-- Cancel -->
         <LinearLayout
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -41,13 +43,17 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/cancel"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
 
         <!-- Trim -->
         <LinearLayout
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -66,13 +72,17 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/trim"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
 
         <!-- Split -->
         <LinearLayout
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -91,6 +101,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/split"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -98,7 +110,9 @@
         <!-- Mute Clip -->
         <LinearLayout
             android:id="@+id/btnVideoMuteContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -118,6 +132,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_mute"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -125,7 +141,9 @@
         <!-- Color Filters / LUTs -->
         <LinearLayout
             android:id="@+id/btnVideoFilterContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -144,6 +162,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_filters"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -151,7 +171,9 @@
         <!-- Mask -->
         <LinearLayout
             android:id="@+id/btnVideoMaskContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -170,6 +192,8 @@
                 android:layout_marginTop="4dp"
                 android:text="Mask"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -177,7 +201,9 @@
         <!-- Adjust -->
         <LinearLayout
             android:id="@+id/btnVideoAdjustContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -196,6 +222,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_adjust"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -203,7 +231,9 @@
         <!-- Speed -->
         <LinearLayout
             android:id="@+id/btnVideoSpeedContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -222,6 +252,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_speed"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -229,7 +261,9 @@
         <!-- Extract Audio -->
         <LinearLayout
             android:id="@+id/btnVideoExtractAudioContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -248,6 +282,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_extract"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -255,7 +291,9 @@
         <!-- Freeze Frame -->
         <LinearLayout
             android:id="@+id/btnVideoFreezeFrameContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -274,6 +312,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_freeze"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -281,7 +321,9 @@
         <!-- Reverse -->
         <LinearLayout
             android:id="@+id/btnVideoReverseContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -300,16 +342,18 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/str_reverse"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
 
-
-
         <!-- Mirror -->
         <LinearLayout
             android:id="@+id/btnVideoMirrorContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -329,6 +373,8 @@
                 android:layout_marginTop="4dp"
                 android:text="Mirror"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/toolTextInactive"/>
         </LinearLayout>
@@ -336,7 +382,9 @@
         <!-- Delete -->
         <LinearLayout
             android:id="@+id/btnVideoDeleteContainer"
-            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
+            android:layout_width="wrap_content"
+            android:minWidth="62dp"
+            android:paddingHorizontal="4dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -355,6 +403,8 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/delete"
                 android:textSize="11sp"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/colorPrimary"/>
         </LinearLayout>
