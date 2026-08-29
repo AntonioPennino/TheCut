@@ -7460,23 +7460,27 @@ class VideoEditingActivity : AppCompatActivity() {
         isFullscreenMode = false
         fullscreenHideHandler.removeCallbacks(hideFullscreenControlsRunnable)
         fullscreenOverlay.visibility = View.GONE
-        if (isTimelineExpanded) {
-            reparentCanvasContainer(pipPlayerContainer)
-        } else {
-            reparentCanvasContainer(playerContainer)
-        }
+        reparentCanvasContainer(playerContainer)
     }
 
     private fun toggleTimelineExpandedMode() {
         isTimelineExpanded = !isTimelineExpanded
         val seekerContainer = findViewById<LinearLayout>(R.id.seekerContainer)
+        val density = resources.displayMetrics.density
 
         if (isTimelineExpanded) {
             btnExpandTimeline.setImageResource(R.drawable.ic_collapse_24)
-            playerContainer.visibility = View.GONE
-            pipPlayerContainer.visibility = View.VISIBLE
-            reparentCanvasContainer(pipPlayerContainer)
+            pipPlayerContainer.visibility = View.GONE
+            playerContainer.visibility = View.VISIBLE
+            reparentCanvasContainer(playerContainer)
 
+            // 1. Make Top Video Monitor Compact (DaVinci / FCP Style, full width, 145dp height)
+            val lpPlayer = playerContainer.layoutParams as LinearLayout.LayoutParams
+            lpPlayer.height = (145 * density).toInt()
+            lpPlayer.weight = 0f
+            playerContainer.layoutParams = lpPlayer
+
+            // 2. Expand Seeker & Timeline to fill all remaining vertical space
             val lpSeeker = seekerContainer.layoutParams as LinearLayout.LayoutParams
             lpSeeker.height = 0
             lpSeeker.weight = 1.0f
@@ -7492,13 +7496,20 @@ class VideoEditingActivity : AppCompatActivity() {
             playerContainer.visibility = View.VISIBLE
             reparentCanvasContainer(playerContainer)
 
+            // 1. Restore Full Height Video Monitor
+            val lpPlayer = playerContainer.layoutParams as LinearLayout.LayoutParams
+            lpPlayer.height = 0
+            lpPlayer.weight = 1.0f
+            playerContainer.layoutParams = lpPlayer
+
+            // 2. Restore Standard Height Timeline (140dp)
             val lpSeeker = seekerContainer.layoutParams as LinearLayout.LayoutParams
             lpSeeker.height = LinearLayout.LayoutParams.WRAP_CONTENT
             lpSeeker.weight = 0f
             seekerContainer.layoutParams = lpSeeker
 
             val lpTimeline = timelineContainer.layoutParams as LinearLayout.LayoutParams
-            lpTimeline.height = 140.dpToPx()
+            lpTimeline.height = (140 * density).toInt()
             lpTimeline.weight = 0f
             timelineContainer.layoutParams = lpTimeline
         }

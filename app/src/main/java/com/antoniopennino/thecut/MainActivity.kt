@@ -411,31 +411,19 @@ class MainActivity : AppCompatActivity() {
     private fun updateHapticFeedbackUI() {
         val prefs = getSharedPreferences("thecut_prefs", MODE_PRIVATE)
         val isEnabled = prefs.getBoolean("haptic_feedback", true)
-        binding.tvCurrentHapticFeedback.text = if (isEnabled) {
-            getString(R.string.str_haptic_enabled_desc)
-        } else {
-            getString(R.string.str_haptic_disabled_desc)
-        }
+        binding.tvCurrentHapticFeedback.text = if (isEnabled) "Attivo" else "Disattivo"
     }
 
     private fun updateFullscreenEditorUI() {
         val prefs = getSharedPreferences("thecut_prefs", MODE_PRIVATE)
         val isFullscreen = prefs.getBoolean("fullscreen_editor", true)
-        binding.tvCurrentFullscreenEditor.text = if (isFullscreen) {
-            getString(R.string.str_fullscreen_enabled_desc)
-        } else {
-            getString(R.string.str_fullscreen_disabled_desc)
-        }
+        binding.tvCurrentFullscreenEditor.text = if (isFullscreen) "Attivo" else "Disattivo"
     }
 
     private fun updateEncoderUI() {
         val prefs = getSharedPreferences("thecut_prefs", MODE_PRIVATE)
         val defaultEncoder = prefs.getString("default_encoder", "hardware") ?: "hardware"
-        if (defaultEncoder == "software") {
-            binding.tvCurrentDefaultEncoder.text = getString(R.string.str_encoder_software)
-        } else {
-            binding.tvCurrentDefaultEncoder.text = getString(R.string.str_encoder_hardware)
-        }
+        binding.tvCurrentDefaultEncoder.text = if (defaultEncoder == "software") "CPU (Soft)" else "GPU (Hard)"
     }
 
     private fun showEncoderDialog() {
