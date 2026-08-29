@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_marginEnd="12dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <FrameLayout
+        android:id="@+id/bgPresetCard"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_aspect_ratio_item"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/ivPresetIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_speed_24"
+            app:tint="@color/iconSecondary" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvPresetName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Flash In"
+        android:textColor="@color/iconSecondary"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-medium"
+        android:singleLine="true" />
+</LinearLayout>

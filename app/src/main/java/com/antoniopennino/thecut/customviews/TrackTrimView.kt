@@ -165,42 +165,47 @@ class TrackTrimView @JvmOverloads constructor(
             canvas.drawRoundRect(rectF, 12f, 12f, trackPaint)
         }
 
-        // Draw Audio Wave Background
-        if (isAudioTrack) {
+        // Draw Audio Wave Background (On Audio Tracks or Subtle on Main Video)
+        if (isAudioTrack || (isMainVideoTrack && audioAmplitudes != null)) {
             canvas.save()
             canvas.clipRect(rectF)
-            val centerY = height / 2f
-            val maxAmplitude = height * 0.35f
-            
+            val centerY = if (isAudioTrack) height / 2f else height * 0.72f
+            val maxAmplitude = if (isAudioTrack) height * 0.38f else height * 0.22f
+
             if (audioAmplitudes != null && audioAmplitudes!!.isNotEmpty()) {
                 val amps = audioAmplitudes!!
-                var x = startX + handleWidth + 4f
-                val waveSpacing = 6f // Closer spacing for real waveforms
-                
-                // Map the time at pixel x to an index in audioAmplitudes
+                var x = startX + handleWidth + 2f
+                val waveSpacing = 5f // Dense pro waveform bars
+
                 while (x < endX - handleWidth) {
                     val relativeTimeMs = ((x - startX) * msPerPixel).toLong()
-                    // audioAmplitudes represents the entire videoDurationMs
-                    val index = ((relativeTimeMs.toFloat() / videoDurationMs) * amps.size).toInt()
-                    
-                    val ampValue = if (index in amps.indices) amps[index] else 0.0f
-                    val amplitude = maxAmplitude * ampValue
-                    
-                    if (amplitude > 1f) {
-                        canvas.drawLine(x, centerY - amplitude, x, centerY + amplitude, wavePaint)
+                    val totalDuration = if (videoDurationMs > 0) videoDurationMs else 1L
+                    val index = ((relativeTimeMs.toFloat() / totalDuration) * amps.size).toInt().coerceIn(0, amps.size - 1)
+
+                    val ampValue = amps[index]
+                    val amplitude = (maxAmplitude * ampValue).coerceAtLeast(2f)
+
+                    // Dual tone: Bright Cyan for peaks, soft Indigo for body
+                    if (ampValue > 0.6f) {
+                        wavePaint.color = Color.parseColor("#06B6D4") // Cyber Cyan peak
+                        wavePaint.strokeWidth = 3.5f
                     } else {
-                        // Draw at least a tiny dot for silence
-                        canvas.drawLine(x, centerY - 1f, x, centerY + 1f, wavePaint)
+                        wavePaint.color = if (isAudioTrack) Color.parseColor("#806366F1") else Color.parseColor("#6606B6D4")
+                        wavePaint.strokeWidth = 3f
                     }
+
+                    canvas.drawLine(x, centerY - amplitude, x, centerY + amplitude, wavePaint)
                     x += waveSpacing
                 }
-            } else {
-                // Fallback to procedural wave if no data
-                var x = startX + handleWidth + 4f
-                val waveSpacing = 12f
+            } else if (isAudioTrack) {
+                // Procedural wave fallback
+                var x = startX + handleWidth + 2f
+                val waveSpacing = 8f
                 var timeOffset = 0f
                 while (x < endX - handleWidth) {
-                    val amplitude = maxAmplitude * (0.3f + 0.7f * Math.abs(Math.sin((x + timeOffset) * 0.05).toFloat()))
+                    val amplitude = maxAmplitude * (0.25f + 0.75f * Math.abs(Math.sin((x + timeOffset) * 0.04).toFloat()))
+                    wavePaint.color = Color.parseColor("#8006B6D4")
+                    wavePaint.strokeWidth = 3f
                     canvas.drawLine(x, centerY - amplitude, x, centerY + amplitude, wavePaint)
                     x += waveSpacing
                     timeOffset += 1f

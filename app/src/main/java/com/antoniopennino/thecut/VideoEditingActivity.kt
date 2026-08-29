@@ -1492,26 +1492,121 @@ class VideoEditingActivity : AppCompatActivity() {
                 toolbar.findViewById<ImageButton>(R.id.btnCloseSpeedSheet)?.setBounceClickListener {
                     hideSpeedEditingToolbar()
                 }
-                toolbar.findViewById<View>(R.id.speedBtn05)?.setBounceClickListener { applySpeedToSegment(0.5f) }
-                toolbar.findViewById<View>(R.id.speedBtn10)?.setBounceClickListener { applySpeedToSegment(1.0f) }
-                toolbar.findViewById<View>(R.id.speedBtn15)?.setBounceClickListener { applySpeedToSegment(1.5f) }
-                toolbar.findViewById<View>(R.id.speedBtn20)?.setBounceClickListener { applySpeedToSegment(2.0f) }
 
-                val slider = toolbar.findViewById<com.google.android.material.slider.Slider>(R.id.sliderCustomSpeed)
-                val tvCustomSpeed = toolbar.findViewById<TextView>(R.id.tvCustomSpeedValue)
-                
-                slider?.addOnChangeListener { _, value, _ ->
-                    val roundedValue = String.format(java.util.Locale.US, "%.1f", value).toFloat()
-                    tvCustomSpeed?.text = "${roundedValue}x"
+                val tabStandard = toolbar.findViewById<TextView>(R.id.tabSpeedStandard)
+                val tabCurve = toolbar.findViewById<TextView>(R.id.tabSpeedCurve)
+                val layoutStandard = toolbar.findViewById<View>(R.id.layoutSpeedStandard)
+                val layoutCurve = toolbar.findViewById<View>(R.id.layoutSpeedCurve)
+
+                tabStandard?.setOnClickListener {
+                    tabStandard.setBackgroundResource(R.drawable.bg_pill_accent)
+                    tabStandard.setTextColor(getColor(R.color.onPrimary))
+                    tabCurve?.setBackgroundColor(Color.TRANSPARENT)
+                    tabCurve?.setTextColor(getColor(R.color.iconSecondary))
+                    layoutStandard?.visibility = View.VISIBLE
+                    layoutCurve?.visibility = View.GONE
                 }
 
-                slider?.addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
-                    override fun onStartTrackingTouch(slider: com.google.android.material.slider.Slider) {}
-                    override fun onStopTrackingTouch(slider: com.google.android.material.slider.Slider) {
-                        val roundedValue = String.format(java.util.Locale.US, "%.1f", slider.value).toFloat()
-                        applySpeedToSegment(roundedValue)
+                tabCurve?.setOnClickListener {
+                    tabCurve.setBackgroundResource(R.drawable.bg_pill_accent)
+                    tabCurve.setTextColor(getColor(R.color.onPrimary))
+                    tabStandard?.setBackgroundColor(Color.TRANSPARENT)
+                    tabStandard?.setTextColor(getColor(R.color.iconSecondary))
+                    layoutStandard?.visibility = View.GONE
+                    layoutCurve?.visibility = View.VISIBLE
+                }
+
+                val tvSpeedDisplay = toolbar.findViewById<TextView>(R.id.tvSpeedValueDisplay)
+                val slider = toolbar.findViewById<SeekBar>(R.id.sliderSpeed)
+
+                fun updateSpeedButtons(activeSpeed: Float) {
+                    val activeBg = R.drawable.bg_pill_accent
+                    val inactiveBg = R.drawable.bg_aspect_ratio_item
+                    toolbar.findViewById<View>(R.id.bgSpeed05)?.setBackgroundResource(if (activeSpeed == 0.5f) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgSpeed10)?.setBackgroundResource(if (activeSpeed == 1.0f) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgSpeed15)?.setBackgroundResource(if (activeSpeed == 1.5f) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgSpeed20)?.setBackgroundResource(if (activeSpeed == 2.0f) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgSpeed50)?.setBackgroundResource(if (activeSpeed == 5.0f) activeBg else inactiveBg)
+                }
+
+                slider?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        val speed = (progress.coerceAtLeast(1) / 10f)
+                        tvSpeedDisplay?.text = String.format(java.util.Locale.US, "%.1fx", speed)
+                        updateSpeedButtons(speed)
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        val speed = ((seekBar?.progress ?: 10).coerceAtLeast(1) / 10f)
+                        applySpeedToSegment(speed)
                     }
                 })
+
+                toolbar.findViewById<View>(R.id.speedBtn05)?.setBounceClickListener {
+                    slider?.progress = 5
+                    applySpeedToSegment(0.5f)
+                }
+                toolbar.findViewById<View>(R.id.speedBtn10)?.setBounceClickListener {
+                    slider?.progress = 10
+                    applySpeedToSegment(1.0f)
+                }
+                toolbar.findViewById<View>(R.id.speedBtn15)?.setBounceClickListener {
+                    slider?.progress = 15
+                    applySpeedToSegment(1.5f)
+                }
+                toolbar.findViewById<View>(R.id.speedBtn20)?.setBounceClickListener {
+                    slider?.progress = 20
+                    applySpeedToSegment(2.0f)
+                }
+                toolbar.findViewById<View>(R.id.speedBtn50)?.setBounceClickListener {
+                    slider?.progress = 50
+                    applySpeedToSegment(5.0f)
+                }
+
+                // Velocity Curve Presets
+                val speedCurveView = toolbar.findViewById<com.antoniopennino.thecut.customviews.SpeedCurveView>(R.id.speedCurveView)
+
+                fun selectPresetButton(activeId: Int) {
+                    val activeBg = R.drawable.bg_pill_accent
+                    val inactiveBg = R.drawable.bg_aspect_ratio_item
+                    toolbar.findViewById<View>(R.id.bgPresetFlashIn)?.setBackgroundResource(if (activeId == R.id.presetFlashIn) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgPresetBulletTime)?.setBackgroundResource(if (activeId == R.id.presetBulletTime) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgPresetMontage)?.setBackgroundResource(if (activeId == R.id.presetMontage) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgPresetFlashOut)?.setBackgroundResource(if (activeId == R.id.presetFlashOut) activeBg else inactiveBg)
+                    toolbar.findViewById<View>(R.id.bgPresetCustom)?.setBackgroundResource(if (activeId == R.id.presetCustom) activeBg else inactiveBg)
+                }
+
+                toolbar.findViewById<View>(R.id.presetFlashIn)?.setBounceClickListener {
+                    selectPresetButton(R.id.presetFlashIn)
+                    speedCurveView?.applyPreset("flash in")
+                    applySpeedToSegment(1.8f)
+                }
+                toolbar.findViewById<View>(R.id.presetBulletTime)?.setBounceClickListener {
+                    selectPresetButton(R.id.presetBulletTime)
+                    speedCurveView?.applyPreset("bullet time")
+                    applySpeedToSegment(0.6f)
+                }
+                toolbar.findViewById<View>(R.id.presetMontage)?.setBounceClickListener {
+                    selectPresetButton(R.id.presetMontage)
+                    speedCurveView?.applyPreset("montage")
+                    applySpeedToSegment(1.4f)
+                }
+                toolbar.findViewById<View>(R.id.presetFlashOut)?.setBounceClickListener {
+                    selectPresetButton(R.id.presetFlashOut)
+                    speedCurveView?.applyPreset("flash out")
+                    applySpeedToSegment(1.7f)
+                }
+                toolbar.findViewById<View>(R.id.presetCustom)?.setBounceClickListener {
+                    selectPresetButton(R.id.presetCustom)
+                    speedCurveView?.applyPreset("linear")
+                    applySpeedToSegment(1.0f)
+                }
+
+                speedCurveView?.onCurveChanged = { points ->
+                    val avgSpeed = points.map { it.speedMultiplier }.average().toFloat()
+                    val rounded = Math.round(avgSpeed * 10f) / 10f
+                    applySpeedToSegment(rounded)
+                }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Speed editing toolbar not found: ${e.message}")
@@ -3876,31 +3971,33 @@ class VideoEditingActivity : AppCompatActivity() {
             0.5f to Pair(R.id.bgSpeed05, R.id.txtSpeed05),
             1.0f to Pair(R.id.bgSpeed10, R.id.txtSpeed10),
             1.5f to Pair(R.id.bgSpeed15, R.id.txtSpeed15),
-            2.0f to Pair(R.id.bgSpeed20, R.id.txtSpeed20)
+            2.0f to Pair(R.id.bgSpeed20, R.id.txtSpeed20),
+            5.0f to Pair(R.id.bgSpeed50, R.id.txtSpeed50)
         )
         
+        val activeBg = R.drawable.bg_pill_accent
+        val inactiveBg = R.drawable.bg_aspect_ratio_item
         speeds.forEach { (s, views) ->
             val bg = toolbar.findViewById<View>(views.first)
             val txt = toolbar.findViewById<TextView>(views.second)
-            if (kotlin.math.abs(speed - s) < 0.01f) {
-                bg?.setBackgroundResource(R.drawable.bg_aspect_ratio_selected)
-                txt?.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.colorOnPrimary))
+            if (kotlin.math.abs(speed - s) < 0.05f) {
+                bg?.setBackgroundResource(activeBg)
+                txt?.setTextColor(getColor(R.color.onPrimary))
             } else {
-                bg?.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
-                txt?.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.toolTextInactive))
+                bg?.setBackgroundResource(inactiveBg)
+                txt?.setTextColor(getColor(R.color.iconSecondary))
             }
         }
         
-        val slider = toolbar.findViewById<com.google.android.material.slider.Slider>(R.id.sliderCustomSpeed)
-        val tvCustomSpeed = toolbar.findViewById<TextView>(R.id.tvCustomSpeedValue)
-        
+        val tvSpeedDisplay = toolbar.findViewById<TextView>(R.id.tvSpeedValueDisplay)
+        tvSpeedDisplay?.text = String.format(java.util.Locale.US, "%.1fx", speed)
+
+        val slider = toolbar.findViewById<SeekBar>(R.id.sliderSpeed)
         slider?.let {
-            val safeSpeed = speed.coerceIn(it.valueFrom, it.valueTo)
-            if (kotlin.math.abs(it.value - safeSpeed) > 0.01f) {
-                it.value = safeSpeed
+            val targetProgress = (speed * 10f).toInt().coerceIn(1, 100)
+            if (it.progress != targetProgress) {
+                it.progress = targetProgress
             }
-            val roundedValue = String.format(java.util.Locale.US, "%.1f", safeSpeed).toFloat()
-            tvCustomSpeed?.text = "${roundedValue}x"
         }
     }
 
