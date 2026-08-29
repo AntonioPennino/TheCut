@@ -32,7 +32,7 @@
             android:background="@drawable/bg_duration_badge"
             android:paddingHorizontal="4dp"
             android:paddingVertical="2dp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/textColor"
             android:textSize="9sp"
             android:textStyle="bold"
             android:visibility="gone" />

@@ -222,8 +222,8 @@
                     android:text="@string/str_remove"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:textAllCaps="false"
-                    android:textColor="#F44336"
-                    app:strokeColor="#F44336"
+                    android:textColor="@color/accentRose"
+                    app:strokeColor="@color/accentRose"
                     app:cornerRadius="24dp"
                     android:layout_marginEnd="12dp"/>
 

@@ -86,6 +86,6 @@
         android:textAllCaps="false"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="#FF5252" />
+        android:textColor="@color/accentRose" />
 
 </LinearLayout>

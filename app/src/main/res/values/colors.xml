@@ -1,57 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- PRIMARY: Electric Pink -->
-    <color name="colorPrimary">#FF2A6D</color>
-    <color name="colorPrimaryVariant">#C81D52</color>
-    <color name="colorOnPrimary">#FFFFFF</color>
+    <!-- PRIMARY: Electric Indigo / Neon Violet -->
+    <color name="colorPrimary">#6366F1</color>
+    <color name="colorPrimaryVariant">#4F46E5</color>
+    <color name="colorOnPrimary">#F8FAFC</color>
 
-    <!-- SECONDARY: Bright Pink Accent -->
-    <color name="colorSecondary">#FF2A6D</color>
-    <color name="colorSecondaryVariant">#C81D52</color>
-    <color name="colorOnSecondary">#FFFFFF</color>
+    <!-- SECONDARY: Cyber Cyan Accent -->
+    <color name="colorSecondary">#06B6D4</color>
+    <color name="colorSecondaryVariant">#0891B2</color>
+    <color name="colorOnSecondary">#F8FAFC</color>
 
-    <!-- BACKGROUND: OLED Black -->
-    <color name="background">#000000</color>
-    <color name="colorOnBackground">#F2F2F2</color>
+    <!-- BACKGROUND: Deep Obsidian / Midnight (Never #000000) -->
+    <color name="background">#0D0E15</color>
+    <color name="colorOnBackground">#F1F5F9</color>
 
-    <!-- SURFACE: Subtle Grays -->
-    <color name="colorSurface">#111114</color>
-    <color name="colorOnSurface">#F2F2F2</color>
+    <!-- SURFACE: Deep Slate / Obsidian Layers -->
+    <color name="colorSurface">#141724</color>
+    <color name="colorOnSurface">#F1F5F9</color>
 
     <!-- UI SPECIFIC -->
-    <color name="statusBarColor">#000000</color>
-    <color name="navigationBarColor">#000000</color> <!-- Transparent/floating effect works better if base is black -->
-    <color name="cinemaBlack">#000000</color>
-    <color name="textColor">#F2F2F2</color>
+    <color name="statusBarColor">#0D0E15</color>
+    <color name="navigationBarColor">#0D0E15</color>
+    <color name="cinemaBlack">#0A0B11</color>
+    <color name="textColor">#F1F5F9</color>
+    <color name="textColorSecondary">#94A3B8</color>
 
     <!-- CONTAINERS (Elevation levels) -->
-    <color name="surfaceContainerLowest">#000000</color>
-    <color name="surfaceContainer">#111114</color>
-    <color name="surfaceContainerHigh">#1A1A20</color>
-    <color name="surfaceVariant">#212128</color>
-    <color name="floatingPanelBackground">#1A1A20</color>
+    <color name="surfaceContainerLowest">#0D0E15</color>
+    <color name="surfaceContainer">#141724</color>
+    <color name="surfaceContainerHigh">#1D2133</color>
+    <color name="surfaceVariant">#262C44</color>
+    <color name="floatingPanelBackground">#191C2C</color>
 
-    <color name="primaryContainer">#FF2A6D</color>
-    <color name="onPrimaryContainer">#FFFFFF</color>
+    <color name="primaryContainer">#6366F1</color>
+    <color name="onPrimaryContainer">#F8FAFC</color>
 
-    <color name="tertiary">#FFC107</color>
-    <color name="tertiaryContainer">#FFA000</color>
-    <color name="onTertiary">#FFFFFF</color>
+    <!-- TERTIARY: Sky Highlight -->
+    <color name="tertiary">#38BDF8</color>
+    <color name="tertiaryContainer">#0284C7</color>
+    <color name="onTertiary">#F8FAFC</color>
 
-    <!-- OUTLINES -->
-    <color name="outline">#3F3F4A</color>
-    <color name="outlineVariant">#2C2C35</color>
-    <color name="iconSecondary">#8A8A93</color>
+    <!-- OUTLINES & BORDERS -->
+    <color name="outline">#2E3550</color>
+    <color name="outlineVariant">#21263A</color>
+    <color name="iconSecondary">#8B95A5</color>
 
     <!-- TOOL COLORS -->
-    <color name="activeTool">#FF2A6D</color>
-    <color name="activeToolBackground">#2A1118</color> <!-- Subtle pink tint for active tool -->
-    <color name="inactiveTool">#8A8A93</color>
-    <color name="inactiveToolBackground">#111114</color>
+    <color name="activeTool">#818CF8</color>
+    <color name="activeToolBackground">#1E223D</color>
+    <color name="inactiveTool">#7E8B9B</color>
+    <color name="inactiveToolBackground">#141724</color>
 
-    <color name="toolTextActive">#FF2A6D</color>
-    <color name="toolTextInactive">#8A8A93</color>
+    <color name="toolTextActive">#818CF8</color>
+    <color name="toolTextInactive">#7E8B9B</color>
 
-    <color name="sliderHalo">#1A1A20</color>
+    <color name="sliderHalo">#1D2133</color>
+
+    <!-- CREATIVE SUITE ACCENTS -->
+    <color name="accentPurple">#A855F7</color>
+    <color name="accentCyan">#06B6D4</color>
+    <color name="accentEmerald">#10B981</color>
+    <color name="accentAmber">#F59E0B</color>
+    <color name="accentRose">#F43F5E</color>
 
 </resources>

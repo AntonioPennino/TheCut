@@ -10,7 +10,7 @@ aboutLibraries {
 }
 
 android {
-    namespace 'com.tharunbirla.librecuts'
+    namespace 'com.antoniopennino.thecut'
     compileSdk 34
 
     androidResources {
@@ -22,11 +22,11 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.tharunbirla.librecuts"
+        applicationId "com.antoniopennino.thecut"
         minSdk 26
         targetSdk 34
-        versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 10
-        versionName "1.0-beta7"
+        versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

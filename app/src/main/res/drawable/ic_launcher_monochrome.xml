@@ -2,15 +2,31 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportWidth="108"
+    android:viewportHeight="108">
     <group
-        android:scaleX="0.464"
-        android:scaleY="0.464"
-        android:translateX="6.432"
-        android:translateY="6.432">
+        android:pivotX="54"
+        android:pivotY="54">
+        <!-- Left Blade / Film Reel Arc -->
         <path
-            android:fillColor="@android:color/white"
-            android:pathData="M11,9.16V2c-5,0.5 -9,4.79 -9,10s4,9.5 9,10v-7.16c-1,-0.41 -2,-1.52 -2,-2.84s1,-2.43 2,-2.84zM14.86,11H22c-0.48,-4.75 -4,-8.53 -9,-9v7.16c1,0.3 1.52,0.98 1.86,1.84zM13,14.84V22c5,-0.47 8.52,-4.25 9,-9h-7.14c-0.34,0.86 -0.86,1.54 -1.86,1.84z"/>
+            android:fillColor="#F1F5F9"
+            android:pathData="M38,28 C26.954,28 18,36.954 18,48 C18,59.046 26.954,68 38,68 L50,68 C52.209,68 54,66.209 54,64 L54,60 C54,57.791 52.209,56 50,56 L38,56 C33.582,56 30,52.418 30,48 C30,43.582 33.582,40 38,40 L50,40 C52.209,40 54,38.209 54,36 L54,32 C54,29.791 52.209,28 50,28 Z" />
+
+        <!-- Right Razor Cut Triangle -->
+        <path
+            android:fillColor="#F1F5F9"
+            android:pathData="M56,36 L86,53 C87.333,53.77 87.333,55.23 86,56 L56,73 C54.667,73.77 53.5,73.05 53.5,71.5 L53.5,37.5 C53.5,35.95 54.667,35.23 56,36 Z" />
+
+        <!-- Cut Line -->
+        <path
+            android:pathData="M34,78 L74,30"
+            android:strokeWidth="3.2"
+            android:strokeColor="#F1F5F9"
+            android:strokeLineCap="round" />
+
+        <!-- Accent Dot -->
+        <path
+            android:pathData="M76,72 A5,5 0 1 0 76,82 A5,5 0 1 0 76,72"
+            android:fillColor="#F1F5F9" />
     </group>
 </vector>

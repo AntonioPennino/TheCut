@@ -112,7 +112,7 @@
                 <View
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
-                    android:background="#22FFFFFF" />
+                    android:background="@color/outline" />
 
                 <ImageView
                     android:id="@+id/btnSaveDropdown"
@@ -157,7 +157,7 @@
                     android:scaleType="centerCrop"
                     android:background="@color/cinemaBlack" />
 
-                <com.tharunbirla.librecuts.customviews.MaskedFrameLayout
+                <com.antoniopennino.thecut.customviews.MaskedFrameLayout
                     android:id="@+id/mainVideoMaskContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -178,50 +178,50 @@
                         android:background="@android:color/transparent"
                         app:shutter_background_color="@android:color/transparent"/>
 
-                    <com.tharunbirla.librecuts.customviews.TransitionPreviewOverlayView
+                    <com.antoniopennino.thecut.customviews.TransitionPreviewOverlayView
                         android:id="@+id/transitionPreviewOverlayView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:visibility="gone"/>
-                </com.tharunbirla.librecuts.customviews.MaskedFrameLayout>
+                </com.antoniopennino.thecut.customviews.MaskedFrameLayout>
             </FrameLayout>
 
 
-            <com.tharunbirla.librecuts.customviews.TextOverlayView
+            <com.antoniopennino.thecut.customviews.TextOverlayView
                 android:id="@+id/textOverlayView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
-            <com.tharunbirla.librecuts.customviews.DraggableTextOverlayView
+            <com.antoniopennino.thecut.customviews.DraggableTextOverlayView
                 android:id="@+id/draggableTextOverlay"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone" />
 
-            <com.tharunbirla.librecuts.customviews.ImageOverlayView
+            <com.antoniopennino.thecut.customviews.ImageOverlayView
                 android:id="@+id/imageOverlayView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
-            <com.tharunbirla.librecuts.customviews.DraggableImageOverlayView
+            <com.antoniopennino.thecut.customviews.DraggableImageOverlayView
                 android:id="@+id/draggableImageOverlay"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone" />
 
-            <com.tharunbirla.librecuts.customviews.CropOverlayView
+            <com.antoniopennino.thecut.customviews.CropOverlayView
                 android:id="@+id/cropOverlayView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone" />
 
-            <com.tharunbirla.librecuts.customviews.VideoMaskOverlayView
+            <com.antoniopennino.thecut.customviews.VideoMaskOverlayView
                 android:id="@+id/videoMaskOverlayView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="gone" />
 
-            <com.tharunbirla.librecuts.customviews.HandwritingCanvasView
+            <com.antoniopennino.thecut.customviews.HandwritingCanvasView
                 android:id="@+id/handwritingCanvasView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -409,7 +409,7 @@
                         android:orientation="vertical"
                         android:clipChildren="false">
 
-                        <com.tharunbirla.librecuts.customviews.TimeRulerView
+                        <com.antoniopennino.thecut.customviews.TimeRulerView
                             android:id="@+id/timeRulerView"
                             android:layout_width="wrap_content"
                             android:layout_height="28dp"
@@ -493,7 +493,7 @@
                     android:padding="8dp"
                     app:tint="@color/colorOnPrimary" />
 
-                <com.tharunbirla.librecuts.customviews.CustomVideoSeeker
+                <com.antoniopennino.thecut.customviews.CustomVideoSeeker
                     android:id="@+id/customVideoSeeker"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -868,7 +868,7 @@
         android:id="@+id/previewLoadingOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#55000000"
+        android:background="#800D0E15"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone">
@@ -878,7 +878,7 @@
             android:layout_height="50dp"
             android:layout_gravity="center"
             android:indeterminate="true"
-            android:indeterminateTint="#FF4081" />
+            android:indeterminateTint="@color/colorPrimary" />
     </FrameLayout>
 
     <!-- Floating PiP Container for Timeline Expand Mode -->
@@ -916,7 +916,7 @@
             android:id="@+id/fullscreenControls"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#44000000"
+            android:background="#800D0E15"
             android:padding="16dp">
 
             <ImageButton
