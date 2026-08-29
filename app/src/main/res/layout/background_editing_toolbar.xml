@@ -68,7 +68,7 @@
             <!-- Color Button -->
             <LinearLayout
                 android:id="@+id/btnBackgroundColor"
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="12dp"
                 android:gravity="center"
@@ -99,7 +99,7 @@
             <!-- Blur Button -->
             <LinearLayout
                 android:id="@+id/btnBackgroundBlur"
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="12dp"
                 android:gravity="center"
@@ -130,7 +130,7 @@
             <!-- Image Button -->
             <LinearLayout
                 android:id="@+id/btnBackgroundImage"
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical">

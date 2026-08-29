@@ -61,7 +61,7 @@
                 <!-- 0.5x -->
                 <LinearLayout
                     android:id="@+id/speedBtn05"
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
                     android:gravity="center"
@@ -86,7 +86,7 @@
                 <!-- 1.0x -->
                 <LinearLayout
                     android:id="@+id/speedBtn10"
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
                     android:gravity="center"
@@ -111,7 +111,7 @@
                 <!-- 1.5x -->
                 <LinearLayout
                     android:id="@+id/speedBtn15"
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
                     android:gravity="center"
@@ -136,7 +136,7 @@
                 <!-- 2.0x -->
                 <LinearLayout
                     android:id="@+id/speedBtn20"
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical">

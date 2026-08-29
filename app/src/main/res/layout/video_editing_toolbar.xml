@@ -22,7 +22,7 @@
 
         <!-- Cancel -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -47,7 +47,7 @@
 
         <!-- Trim -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -72,7 +72,7 @@
 
         <!-- Split -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -98,7 +98,7 @@
         <!-- Mute Clip -->
         <LinearLayout
             android:id="@+id/btnVideoMuteContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -125,7 +125,7 @@
         <!-- Color Filters / LUTs -->
         <LinearLayout
             android:id="@+id/btnVideoFilterContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -151,7 +151,7 @@
         <!-- Mask -->
         <LinearLayout
             android:id="@+id/btnVideoMaskContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -177,7 +177,7 @@
         <!-- Adjust -->
         <LinearLayout
             android:id="@+id/btnVideoAdjustContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -203,7 +203,7 @@
         <!-- Speed -->
         <LinearLayout
             android:id="@+id/btnVideoSpeedContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -229,7 +229,7 @@
         <!-- Extract Audio -->
         <LinearLayout
             android:id="@+id/btnVideoExtractAudioContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -255,7 +255,7 @@
         <!-- Freeze Frame -->
         <LinearLayout
             android:id="@+id/btnVideoFreezeFrameContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -281,7 +281,7 @@
         <!-- Reverse -->
         <LinearLayout
             android:id="@+id/btnVideoReverseContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -309,7 +309,7 @@
         <!-- Mirror -->
         <LinearLayout
             android:id="@+id/btnVideoMirrorContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -336,7 +336,7 @@
         <!-- Delete -->
         <LinearLayout
             android:id="@+id/btnVideoDeleteContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">

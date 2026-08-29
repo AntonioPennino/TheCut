@@ -115,7 +115,7 @@
 
         <!-- Cancel -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -140,7 +140,7 @@
 
         <!-- Duplicate -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -166,7 +166,7 @@
         <!-- Mirror -->
         <LinearLayout
             android:id="@+id/btnImageMirrorContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -193,7 +193,7 @@
         <!-- Chroma Key -->
         <LinearLayout
             android:id="@+id/btnImageChromaKeyContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -220,7 +220,7 @@
         <!-- Opacity -->
         <LinearLayout
             android:id="@+id/btnImageOpacityContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -248,7 +248,7 @@
         <!-- Mask -->
         <LinearLayout
             android:id="@+id/btnImageMaskContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -275,7 +275,7 @@
         <!-- Loop -->
         <LinearLayout
             android:id="@+id/btnImageLoopContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
@@ -303,7 +303,7 @@
         <!-- Keyframe -->
         <LinearLayout
             android:id="@+id/btnImageKeyframeContainer"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -328,7 +328,7 @@
 
         <!-- Delete -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
@@ -352,7 +352,7 @@
         </LinearLayout>
         <!-- Done -->
         <LinearLayout
-            android:layout_width="60dp"
+            android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">

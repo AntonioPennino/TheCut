@@ -263,8 +263,50 @@ class MainActivity : AppCompatActivity() {
             showOnboardingDialog(prefs)
         }
 
+        // Load saved recent projects automatically
+        loadRecentProjects()
+
         // Handle shared/intent videos
         handleIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadRecentProjects()
+    }
+
+    private fun loadRecentProjects() {
+        try {
+            val projects = com.antoniopennino.thecut.utils.ProjectStorageManager.getSavedProjects(this)
+            binding.containerRecentProjects.removeAllViews()
+
+            if (projects.isEmpty()) {
+                binding.tvNoRecentProjects.visibility = View.VISIBLE
+            } else {
+                binding.tvNoRecentProjects.visibility = View.GONE
+                for (project in projects.take(6)) {
+                    val itemView = layoutInflater.inflate(R.layout.item_recent_project, binding.containerRecentProjects, false)
+                    val tvTitle = itemView.findViewById<TextView>(R.id.tvProjectTitle)
+                    val tvDate = itemView.findViewById<TextView>(R.id.tvProjectDate)
+
+                    tvTitle.text = project.title
+                    tvDate.text = "Modificato: ${project.formattedDate}"
+
+                    itemView.setOnClickListener {
+                        val uri = Uri.fromFile(project.file)
+                        val intent = Intent(this, ProjectImportActivity::class.java).apply {
+                            putExtra("PROJECT_URI", uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        }
+                        startActivity(intent)
+                    }
+
+                    binding.containerRecentProjects.addView(itemView)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error loading recent projects", e)
+        }
     }
 
     private fun updateExportFolderUI(uri: Uri?, textView: TextView, defaultStringResId: Int) {

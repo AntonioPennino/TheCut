@@ -4,16 +4,16 @@
     android:viewportWidth="24"
     android:viewportHeight="24"
     android:tint="@color/textColor">
-  <group
-      android:pivotX="12"
-      android:pivotY="12"
-      android:scaleX="0.8"
-      android:scaleY="0.8">
+    <!-- Horseshoe body -->
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M3,3V11C3,15.97 7.03,20 12,20C16.97,20 21,15.97 21,11V3H16V11C16,13.21 14.21,15 12,15C9.79,15 8,13.21 8,11V3H3Z"/>
+        android:fillColor="@color/textColor"
+        android:pathData="M4,10.5C4,14.92 7.58,18.5 12,18.5C16.42,18.5 20,14.92 20,10.5V5.5H16V10.5C16,12.71 14.21,14.5 12,14.5C9.79,14.5 8,12.71 8,10.5V5.5H4V10.5Z" />
+    <!-- Left pole cap -->
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M3,3H8V7H3VZ M16,3H21V7H16VZ" />
-  </group>
+        android:fillColor="@color/colorPrimary"
+        android:pathData="M4,3.5H8V5H4VZ" />
+    <!-- Right pole cap -->
+    <path
+        android:fillColor="@color/colorPrimary"
+        android:pathData="M16,3.5H20V5H16VZ" />
 </vector>

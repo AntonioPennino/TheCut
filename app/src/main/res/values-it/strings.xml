@@ -4,7 +4,7 @@
     <string name="app_name">TheCut</string>
     <string name="trim">Taglio</string>
     <string name="split">Split</string>
-    <string name="export">Esportazione</string>
+    <string name="export">Esporta</string>
     <string name="delete">Elimina</string>
     <string name="loading">Importo Video…</string>
     <string name="cancel">Annulla</string>
@@ -24,7 +24,7 @@
     <string name="str_timeline_empty">Timeline Vuota</string>
     <string name="str_import_video">Importa Video</string>
     <string name="str_text">Testo</string>
-    <string name="str_overlay">Sovrapposizione</string>
+    <string name="str_overlay">Sovrapponi</string>
     <string name="str_audio">Audio</string>
     <string name="str_voice">Voce</string>
     <string name="str_subtitles">Sottotitoli</string>

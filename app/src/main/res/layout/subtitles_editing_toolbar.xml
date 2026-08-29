@@ -132,7 +132,7 @@
                 android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:layout_width="60dp"
+                    android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                     android:layout_height="wrap_content"
                     android:text="Font"
                     android:textColor="@color/textColor"

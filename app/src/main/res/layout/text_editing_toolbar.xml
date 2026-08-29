@@ -54,7 +54,7 @@
 
             <!-- Cancel -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -79,7 +79,7 @@
 
             <!-- Keyboard -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -104,7 +104,7 @@
 
             <!-- Color Palette -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -129,7 +129,7 @@
 
             <!-- Format Settings -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -154,7 +154,7 @@
 
             <!-- Duplicate -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -180,7 +180,7 @@
             <!-- Keyframes -->
             <LinearLayout
                 android:id="@+id/btnTextKeyframeContainer"
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -205,7 +205,7 @@
 
             <!-- Delete -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">
@@ -230,7 +230,7 @@
 
             <!-- Done -->
             <LinearLayout
-                android:layout_width="60dp"
+                android:layout_width="wrap_content" android:minWidth="56dp" android:paddingHorizontal="3dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center">

@@ -1926,6 +1926,19 @@ class VideoEditingActivity : AppCompatActivity() {
                     renderSegmentedPreview()
                 }
             }
+
+            findViewById<ImageButton>(R.id.btnSaveProjectQuick)?.setBounceClickListener {
+                val currentProj = viewModel.project.value
+                if (currentProj != null) {
+                    val savedFile = com.antoniopennino.thecut.utils.ProjectStorageManager.saveProject(this, currentProj)
+                    if (savedFile != null) {
+                        viewModel.markProjectSaved()
+                        Toast.makeText(this, "Progetto salvato con successo! ✅", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Errore durante il salvataggio del progetto", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         } catch (e: Exception) {
             Log.d(TAG, "Undo/Redo/Preview buttons not found in layout (optional)")
         }
