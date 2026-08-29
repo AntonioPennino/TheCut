@@ -336,14 +336,14 @@
 
                 <ImageButton
                     android:id="@+id/btnPlayPause"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/circle_primary_container"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_play_pause_circle"
                     android:src="@drawable/ic_play_24"
-                    android:padding="10dp"
+                    android:padding="12dp"
                     android:scaleType="fitCenter"
-                    android:elevation="4dp"
-                    app:tint="@color/onPrimaryContainer" />
+                    android:elevation="6dp"
+                    app:tint="@color/onPrimary" />
 
                 <Space
                     android:layout_width="0dp"

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- Top Header Bar -->
+    <!-- Top Header Bar (Apple Studio Style) -->
     <LinearLayout
         android:id="@+id/layoutTopHeader"
         android:layout_width="match_parent"
@@ -16,8 +16,9 @@
         android:background="@color/background">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
@@ -25,28 +26,41 @@
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
                 android:textColor="@color/textColor"
-                android:textSize="22sp"
+                android:textSize="24sp"
                 android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.02" />
+                android:letterSpacing="0.03" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Video Editor"
+                android:text="Cinema Studio"
                 android:textColor="@color/iconSecondary"
-                android:textSize="11sp"
-                android:fontFamily="sans-serif" />
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:letterSpacing="0.05" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvAboutVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v1.0"
+            android:textColor="@color/colorPrimaryVariant"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/bg_pill_accent"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp" />
     </LinearLayout>
 
-    <!-- Home Page Content (Bento Style Layout) -->
+    <!-- Home Page Content (Apple Bento Creative Studio Hub) -->
     <ScrollView
         android:id="@+id/layoutHomeContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/layoutTopHeader"
         android:paddingHorizontal="20dp"
-        android:paddingTop="12dp"
+        android:paddingTop="8dp"
         android:paddingBottom="100dp"
         android:clipToPadding="false"
         android:overScrollMode="never"
@@ -58,36 +72,35 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Hero Bento Card: New Project -->
+            <!-- Hero Creation Canvas Card: New Project -->
             <LinearLayout
                 android:id="@+id/btnImport"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="210dp"
+                android:minHeight="220dp"
                 android:background="@drawable/bg_hero_bento_primary"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                android:gravity="bottom"
+                android:gravity="center"
                 android:orientation="vertical"
-                android:padding="24dp"
+                android:padding="28dp"
                 android:elevation="8dp">
 
                 <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
+                    android:layout_marginBottom="18dp">
 
                     <View
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
                         android:background="@drawable/circle_primary_container" />
 
                     <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="14dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_centerInParent="true"
                         android:src="@drawable/ic_add_24"
                         app:tint="@color/onPrimaryContainer" />
                 </RelativeLayout>
@@ -97,103 +110,112 @@
                     android:layout_height="wrap_content"
                     android:text="@string/str_new_project"
                     android:textColor="@color/textColor"
-                    android:textSize="24sp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textSize="22sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Your next edit starts right here."
+                    android:text="Tocca per iniziare una nuova creazione video"
                     android:textColor="@color/iconSecondary"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif" />
 
             </LinearLayout>
 
+            <!-- Section Label: Quick Tools -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:layout_marginBottom="12dp"
+                android:text="Spazio di Lavoro"
+                android:textColor="@color/textColorSecondary"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05" />
+
             <!-- Secondary Bento Card: Open Project -->
             <LinearLayout
                 android:id="@+id/btnOpenProject"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="150dp"
-                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_hero_bento_secondary"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:elevation="4dp">
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:elevation="3dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
+                <View
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/circle_primary_container" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="-36dp"
+                    android:src="@drawable/ic_folder_24"
+                    app:tint="@color/onPrimaryContainer" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                    <View
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/circle_primary_container" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Apri Progetto"
+                        android:textColor="@color/textColor"
+                        android:textSize="17sp"
+                        android:fontFamily="sans-serif-medium" />
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="12dp"
-                        android:src="@drawable/ic_folder_24"
-                        app:tint="@color/onPrimaryContainer" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Carica file progetto salvato (.cutproj)"
+                        android:textColor="@color/iconSecondary"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif" />
+                </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_arrow_up_right_24"
-                        app:tint="@color/iconSecondary"
-                        android:alpha="0.5" />
-                </RelativeLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Open Project"
-                    android:textColor="@color/textColor"
-                    android:textSize="18sp"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Load saved project file to resume editing"
-                    android:textColor="@color/iconSecondary"
-                    android:textSize="13sp"
-                    android:fontFamily="sans-serif"
-                    android:visibility="visible" />
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_right_24"
+                    app:tint="@color/iconSecondary"
+                    android:alpha="0.6" />
 
             </LinearLayout>
 
-            <!-- App Tagline -->
+            <!-- App Tagline / Subtle Attribution -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="48dp"
+                android:layout_marginTop="40dp"
                 android:gravity="center"
-                android:letterSpacing="0.05"
-                android:text="@string/str_free_open_source_nlimitless_cr"
+                android:letterSpacing="0.08"
+                android:text="THECUT CREATIVE SUITE"
                 android:textColor="@color/colorOnSurface"
-                android:alpha="0.4"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-light" />
+                android:alpha="0.3"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-medium" />
 
         </LinearLayout>
 
     </ScrollView>
 
-    <!-- Settings Page Content (Bento Style Layout) -->
+    <!-- Settings Page Content (Clean iOS-Style Grouped Layout) -->
     <ScrollView
         android:id="@+id/layoutSettingsContent"
         android:layout_width="match_parent"
@@ -201,7 +223,7 @@
         android:layout_below="@id/layoutTopHeader"
         android:visibility="gone"
         android:paddingHorizontal="20dp"
-        android:paddingTop="12dp"
+        android:paddingTop="8dp"
         android:paddingBottom="100dp"
         android:clipToPadding="false"
         android:overScrollMode="never"
@@ -215,12 +237,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginBottom="16dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/str_settings"
                 android:textColor="@color/textColor"
-                android:textSize="24sp" />
+                android:textSize="22sp" />
 
             <!-- General Settings Bento Card -->
             <LinearLayout
@@ -229,15 +251,16 @@
                 android:background="@drawable/bg_hero_bento_secondary"
                 android:orientation="vertical"
                 android:padding="20dp"
-                android:elevation="4dp">
+                android:elevation="3dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
                     android:text="@string/str_general"
-                    android:textColor="@color/textColor"
-                    android:textSize="16sp"
+                    android:textColor="@color/colorPrimaryVariant"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"
                     android:layout_marginBottom="12dp" />
 
                 <!-- App Language Setting -->
@@ -249,138 +272,42 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingVertical="10dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_app_language"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
-                    
-                    <TextView
-                        android:id="@+id/tvCurrentLanguage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_system_default"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
+                    android:paddingVertical="8dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/str_app_language"
+                            android:textColor="@color/textColor"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentLanguage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif"
+                            android:text="@string/str_system_default"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="13sp" />
+                    </RelativeLayout>
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/outlineVariant"
-                    android:layout_marginVertical="4dp" />
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
 
-                <!-- Video Export Folder Setting -->
-                <LinearLayout
-                    android:id="@+id/btnChangeExportFolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:paddingVertical="10dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_video_export_folder"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
-                    
-                    <TextView
-                        android:id="@+id/tvCurrentExportFolder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_default_movies_librecuts"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/outlineVariant"
-                    android:layout_marginVertical="4dp" />
-
-                <!-- Audio Export Folder Setting -->
-                <LinearLayout
-                    android:id="@+id/btnChangeAudioExportFolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:paddingVertical="10dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_audio_export_folder"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
-                    
-                    <TextView
-                        android:id="@+id/tvCurrentAudioExportFolder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_default_music_librecuts"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/outlineVariant"
-                    android:layout_marginVertical="4dp" />
-
-                <!-- Snapshot Export Folder Setting -->
-                <LinearLayout
-                    android:id="@+id/btnChangeSnapshotExportFolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:paddingVertical="10dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_snapshot_export_folder"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
-                    
-                    <TextView
-                        android:id="@+id/tvCurrentSnapshotExportFolder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_default_pictures_librecuts"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/outlineVariant"
-                    android:layout_marginVertical="4dp" />
-
-                <!-- Haptic Feedback Setting -->
+                <!-- Haptic Feedback Toggle -->
                 <LinearLayout
                     android:id="@+id/btnToggleHapticFeedback"
                     android:layout_width="match_parent"
@@ -389,48 +316,42 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingVertical="10dp">
+                    android:paddingVertical="8dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_haptic_feedback"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/tvCurrentHapticFeedback"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_haptic_enabled_desc"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/str_haptic_feedback"
+                            android:textColor="@color/textColor"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentHapticFeedback"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif"
+                            android:text="Attivo"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="13sp" />
+                    </RelativeLayout>
                 </LinearLayout>
 
-            </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
 
-            <!-- Editor & Rendering Bento Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_hero_bento_secondary"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:elevation="4dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="@string/str_editor_and_rendering"
-                    android:textColor="@color/textColor"
-                    android:textSize="16sp"
-                    android:layout_marginBottom="12dp" />
-
-                <!-- Fullscreen Editor Setting -->
+                <!-- Fullscreen Editor Toggle -->
                 <LinearLayout
                     android:id="@+id/btnToggleFullscreenEditor"
                     android:layout_width="match_parent"
@@ -439,33 +360,42 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingVertical="10dp">
+                    android:paddingVertical="8dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_fullscreen_editor"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/tvCurrentFullscreenEditor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_fullscreen_enabled_desc"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/str_fullscreen_editor"
+                            android:textColor="@color/textColor"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentFullscreenEditor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif"
+                            android:text="Attivo"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="13sp" />
+                    </RelativeLayout>
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/outlineVariant"
-                    android:layout_marginVertical="4dp" />
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
 
-                <!-- Default Encoder Setting -->
+                <!-- Default Encoder -->
                 <LinearLayout
                     android:id="@+id/btnChangeDefaultEncoder"
                     android:layout_width="match_parent"
@@ -474,29 +404,38 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingVertical="10dp">
+                    android:paddingVertical="8dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/str_default_encoder"
-                        android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/tvCurrentDefaultEncoder"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/str_encoder_hardware"
-                        android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/str_default_encoder"
+                            android:textColor="@color/textColor"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvCurrentDefaultEncoder"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:fontFamily="sans-serif"
+                            android:text="GPU"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="13sp" />
+                    </RelativeLayout>
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- System Bento Card -->
+            <!-- Storage & Export Paths Bento Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -504,68 +443,338 @@
                 android:background="@drawable/bg_hero_bento_secondary"
                 android:orientation="vertical"
                 android:padding="20dp"
-                android:elevation="4dp">
+                android:elevation="3dp">
 
-                <!-- Check for Updates Setting -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/str_storage_and_paths"
+                    android:textColor="@color/colorPrimaryVariant"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Export Video Directory -->
                 <LinearLayout
-                    android:id="@+id/btnCheckForUpdates"
+                    android:id="@+id/btnChangeExportFolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingVertical="10dp">
-                    
+                    android:paddingVertical="6dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/str_check_for_updates"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_export_directory"
                         android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
-                    
+                        android:textSize="15sp" />
+
                     <TextView
+                        android:id="@+id/tvCurrentExportFolder"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="@string/str_manually_check_for_the_latest"
+                        android:fontFamily="sans-serif"
+                        android:text="@string/str_default_movies_librecuts"
                         android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/outlineVariant"
-                    android:layout_marginVertical="4dp" />
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
 
-                <!-- Open Source Licenses Setting -->
+                <!-- Export Audio Directory -->
                 <LinearLayout
-                    android:id="@+id/btnOpenSourceLicenses"
+                    android:id="@+id/btnChangeAudioExportFolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:paddingVertical="10dp">
-                    
+                    android:paddingVertical="6dp">
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/str_open_source_licenses"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_audio_export_directory"
                         android:textColor="@color/textColor"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium" />
-                    
+                        android:textSize="15sp" />
+
                     <TextView
+                        android:id="@+id/tvCurrentAudioExportFolder"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="@string/str_view_third_party_software_licenses"
+                        android:fontFamily="sans-serif"
+                        android:text="@string/str_default_music_librecuts"
                         android:textColor="@color/iconSecondary"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
+
+                <!-- Snapshot Directory -->
+                <LinearLayout
+                    android:id="@+id/btnChangeSnapshotExportFolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_snapshot_directory"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/tvCurrentSnapshotExportFolder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="sans-serif"
+                        android:text="@string/str_default_pictures_librecuts"
+                        android:textColor="@color/iconSecondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Support & Feedback Bento Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_hero_bento_secondary"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:elevation="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/str_support_and_feedback"
+                    android:textColor="@color/colorPrimaryVariant"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Check Updates -->
+                <LinearLayout
+                    android:id="@+id/btnCheckForUpdates"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_check_for_updates"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
+
+                <!-- Licenses -->
+                <LinearLayout
+                    android:id="@+id/btnOpenSourceLicenses"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_open_source_licenses"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
+
+                <!-- Star GitHub -->
+                <LinearLayout
+                    android:id="@+id/btnStarGithub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_star_on_github"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
+
+                <!-- Translate -->
+                <LinearLayout
+                    android:id="@+id/btnTranslate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_help_translate"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
+
+                <!-- Report Bug -->
+                <LinearLayout
+                    android:id="@+id/btnReportBug"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_report_a_bug"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/outline" />
+
+                <!-- Sponsor -->
+                <LinearLayout
+                    android:id="@+id/btnSponsor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/str_sponsor_project"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -573,7 +782,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- About Page Content (Bento Style Layout) -->
+    <!-- About Page Content -->
     <ScrollView
         android:id="@+id/layoutAboutContent"
         android:layout_width="match_parent"
@@ -581,7 +790,7 @@
         android:layout_below="@id/layoutTopHeader"
         android:visibility="gone"
         android:paddingHorizontal="20dp"
-        android:paddingTop="12dp"
+        android:paddingTop="8dp"
         android:paddingBottom="100dp"
         android:clipToPadding="false"
         android:overScrollMode="never"
@@ -590,182 +799,132 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <!-- Hero Bento Card: About Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_hero_bento_primary"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:gravity="center"
-                android:elevation="8dp">
-
-                <ImageView
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:src="@mipmap/ic_launcher_round" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="@string/app_name"
-                    android:textColor="@color/textColor"
-                    android:textSize="26sp" />
-
-                <TextView
-                    android:id="@+id/tvAboutVersion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/colorSecondary"
-                    android:textSize="13sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:background="@drawable/bg_pill_accent"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center"
-                    android:lineSpacingMultiplier="1.3"
-                    android:text="@string/str_a_privacy_friendly_open_source"
-                    android:textColor="@color/iconSecondary"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <!-- Support & Community Bento Card -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_hero_bento_secondary"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:gravity="center_horizontal"
-                android:elevation="4dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="@string/str_support_amp_feedback"
-                    android:textColor="@color/textColor"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:gravity="center"
-                    android:text="@string/str_librecuts_is_open_source_help"
-                    android:textColor="@color/iconSecondary"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnStarGithub"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/str_star_on_github"
-                    android:textColor="@color/onPrimaryContainer"
-                    android:backgroundTint="@color/colorPrimary"
-                    app:cornerRadius="14dp"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    app:icon="@drawable/ic_star_24"
-                    app:iconTint="@color/onPrimaryContainer"
-                    app:iconGravity="textStart"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnTranslate"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/str_help_translate"
-                    android:textColor="@color/textColor"
-                    android:backgroundTint="@color/surfaceContainerHigh"
-                    app:strokeColor="@color/outline"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="14dp"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    app:icon="@drawable/ic_translate_24"
-                    app:iconTint="@color/textColor"
-                    app:iconGravity="textStart"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnReportBug"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/str_report_a_bug"
-                    android:textColor="@color/textColor"
-                    android:backgroundTint="@color/surfaceContainerHigh"
-                    app:strokeColor="@color/outline"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="14dp"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    app:icon="@drawable/ic_bug_24"
-                    app:iconTint="@color/textColor"
-                    app:iconGravity="textStart"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSponsor"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/str_sponsor_project"
-                    android:textColor="@color/accentRose"
-                    android:backgroundTint="@color/surfaceContainerHigh"
-                    app:strokeColor="@color/accentRose"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="14dp"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    app:icon="@drawable/ic_heart_24"
-                    app:iconTint="@color/accentRose"
-                    app:iconGravity="textStart"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp" />
-
-            </LinearLayout>
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/ic_launcher_foreground" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="32dp"
-                android:alpha="0.4"
-                android:text="@string/str_made_by_tharun_birla"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/app_name"
                 android:textColor="@color/textColor"
-                android:textSize="12sp" />
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="sans-serif"
+                android:text="Versione 1.0.0"
+                android:textColor="@color/iconSecondary"
+                android:textSize="13sp" />
+
+            <!-- About Links Bento Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/bg_hero_bento_secondary"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:elevation="3dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_github_24"
+                        app:tint="@color/textColor" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="GitHub Repository"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="6dp"
+                    android:background="@color/outline" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="10dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_discord_24"
+                        app:tint="@color/textColor" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Discord Community"
+                        android:textColor="@color/textColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/iconSecondary" />
+                </LinearLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation Bar (Docked Full-Width Spec) -->
+    <!-- Floating Glass Bottom Navigation Dock (Apple Style) -->
     <LinearLayout
         android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="64dp"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/bg_bottom_nav_docked"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_bottom_nav_floating"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="12dp"
         android:elevation="16dp">
 
         <FrameLayout
@@ -782,7 +941,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingHorizontal="18dp">
+                android:paddingHorizontal="16dp">
                 <ImageView
                     android:id="@+id/ivHome"
                     android:layout_width="20dp"
@@ -794,7 +953,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Home"
+                    android:text="Studio"
                     android:textColor="@color/colorPrimary"
                     android:textSize="13sp"
                     android:singleLine="true"
@@ -816,7 +975,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingHorizontal="18dp">
+                android:paddingHorizontal="16dp">
                 <ImageView
                     android:id="@+id/ivSettings"
                     android:layout_width="20dp"
@@ -828,7 +987,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Settings"
+                    android:text="Impostazioni"
                     android:textColor="@color/inactiveTool"
                     android:textSize="13sp"
                     android:singleLine="true"
@@ -850,7 +1009,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingHorizontal="18dp">
+                android:paddingHorizontal="16dp">
                 <ImageView
                     android:id="@+id/ivAbout"
                     android:layout_width="20dp"
@@ -862,7 +1021,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="About"
+                    android:text="Info"
                     android:textColor="@color/inactiveTool"
                     android:textSize="13sp"
                     android:singleLine="true"

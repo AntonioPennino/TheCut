@@ -5,6 +5,7 @@
     <color name="colorPrimary">#6366F1</color>
     <color name="colorPrimaryVariant">#4F46E5</color>
     <color name="colorOnPrimary">#F8FAFC</color>
+    <color name="onPrimary">#F8FAFC</color>
 
     <!-- SECONDARY: Cyber Cyan Accent -->
     <color name="colorSecondary">#06B6D4</color>
