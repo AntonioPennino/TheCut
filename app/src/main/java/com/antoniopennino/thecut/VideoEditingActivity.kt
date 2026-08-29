@@ -1927,15 +1927,22 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
             }
 
-            findViewById<ImageButton>(R.id.btnSaveProjectQuick)?.setBounceClickListener {
+            val btnSaveProjectQuick = findViewById<ImageButton>(R.id.btnSaveProjectQuick)
+            btnSaveProjectQuick?.setBounceClickListener {
                 val currentProj = viewModel.project.value
                 if (currentProj != null) {
                     val savedFile = com.antoniopennino.thecut.utils.ProjectStorageManager.saveProject(this, currentProj)
                     if (savedFile != null) {
                         viewModel.markProjectSaved()
-                        Toast.makeText(this, "Progetto salvato con successo! ✅", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Errore durante il salvataggio del progetto", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            lifecycleScope.launch {
+                viewModel.hasUnsavedEdits.collect { hasUnsaved ->
+                    btnSaveProjectQuick?.apply {
+                        isEnabled = hasUnsaved
+                        alpha = if (hasUnsaved) 1.0f else 0.35f
                     }
                 }
             }
