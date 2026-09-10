@@ -428,9 +428,96 @@ fun VideoEditingViewModel.setScrubProxyUri(dependencyId: String, proxyUri: Uri) 
                     } else op
                 }
                 project.copy(operations = newOps)
-            } else project
+            } else {
+                project
+            }
         } else {
             project
         }
+    })
+}
+
+fun VideoEditingViewModel.applySilenceCut(
+    index: Int,
+    speechSegments: List<com.antoniopennino.thecut.utils.SpeechInterval>,
+    sourceUri: Uri,
+    sourceDuration: Long
+) {
+    if (speechSegments.isEmpty()) return
+    executeCommand(com.antoniopennino.thecut.commands.MutateProjectCommand("Taglio Silenzi") { project ->
+        val ops = project.operations.toMutableList()
+
+        if (index == 0) {
+            val speedOp = ops.filterIsInstance<EditOperation.SpeedMain>().lastOrNull()
+            val reverseOp = ops.filterIsInstance<EditOperation.ReverseMain>().lastOrNull()
+            val mirrorOp = ops.filterIsInstance<EditOperation.MirrorMain>().lastOrNull()
+            val maskOp = ops.filterIsInstance<EditOperation.MaskMain>().lastOrNull()
+
+            val speed = speedOp?.speed ?: 1.0f
+            val isReversed = reverseOp?.isReversed ?: false
+            val isMirrored = mirrorOp?.isMirrored ?: false
+            val maskConfig = maskOp?.maskConfig ?: EditOperation.MaskConfig()
+            val proxyUri = reverseOp?.proxyUri ?: speedOp?.proxyUri
+
+            // 1. Update Clip 0 Trim
+            val trimIndex = ops.indexOfFirst { it is EditOperation.Trim }
+            val firstSegment = speechSegments.first()
+            if (trimIndex != -1) {
+                ops[trimIndex] = (ops[trimIndex] as EditOperation.Trim).copy(
+                    startMs = firstSegment.startMs,
+                    endMs = firstSegment.endMs
+                )
+            } else {
+                ops.add(0, EditOperation.Trim(firstSegment.startMs, firstSegment.endMs))
+            }
+
+            // 2. Add remaining speech segments as MergeItems right after Clip 0
+            if (speechSegments.size > 1) {
+                val newItems = speechSegments.drop(1).map { seg ->
+                    EditOperation.MergeItem(
+                        uri = sourceUri,
+                        durationMs = sourceDuration,
+                        trimStartMs = seg.startMs,
+                        trimEndMs = seg.endMs,
+                        speed = speed,
+                        isReversed = isReversed,
+                        isMirrored = isMirrored,
+                        maskConfig = maskConfig,
+                        proxyUri = proxyUri
+                    )
+                }
+                val mergeIdx = ops.indexOfFirst { it is EditOperation.Merge }
+                if (mergeIdx != -1) {
+                    val mergeOp = ops[mergeIdx] as EditOperation.Merge
+                    val mergedList = mergeOp.items.toMutableList()
+                    mergedList.addAll(0, newItems)
+                    ops[mergeIdx] = mergeOp.copy(items = mergedList)
+                } else {
+                    ops.add(EditOperation.Merge(newItems))
+                }
+            }
+        } else {
+            // Clip index > 0 is inside Merge operation
+            val mergeIdx = ops.indexOfFirst { it is EditOperation.Merge }
+            if (mergeIdx != -1) {
+                val mergeOp = ops[mergeIdx] as EditOperation.Merge
+                val items = mergeOp.items.toMutableList()
+                val targetIndex = index - 1
+                if (targetIndex in items.indices) {
+                    val baseItem = items[targetIndex]
+                    val replacementItems = speechSegments.map { seg ->
+                        baseItem.copy(
+                            trimStartMs = seg.startMs,
+                            trimEndMs = seg.endMs
+                        )
+                    }
+                    items.removeAt(targetIndex)
+                    items.addAll(targetIndex, replacementItems)
+                    ops[mergeIdx] = mergeOp.copy(items = items)
+                }
+            }
+        }
+
+        project.copy(operations = ops)
     })
 }

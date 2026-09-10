@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_nav_docked"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="12dp">
+
+    <!-- Top Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_alignParentStart="true">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_closed_caption_24"
+                app:tint="@color/colorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/str_bulk_subtitles_title"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvBulkCueCountBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="0 battute"
+                android:textColor="@color/colorPrimary"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:background="@drawable/rounded_time_bg" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnCloseBulkSubtitles"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close_24"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            app:tint="@color/textColorSecondary"
+            android:contentDescription="Close" />
+    </RelativeLayout>
+
+    <!-- Toolbar Action Chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddCue"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="@string/str_add_cue"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textColor="@color/textColor"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_add_24"
+                app:iconSize="16dp"
+                app:iconTint="@color/colorPrimary"
+                android:paddingHorizontal="12dp"
+                android:layout_marginEnd="6dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleGlobalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="@string/str_global_style"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textColor="@color/textColor"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_text_24"
+                app:iconSize="16dp"
+                app:iconTint="@color/colorPrimary"
+                android:paddingHorizontal="12dp"
+                android:layout_marginEnd="6dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleShiftTiming"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="@string/str_shift_timing"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textColor="@color/textColor"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_swap_24"
+                app:iconSize="16dp"
+                app:iconTint="@color/colorPrimary"
+                android:paddingHorizontal="12dp"
+                android:layout_marginEnd="6dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleSearchReplace"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="@string/str_search_replace"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                android:textColor="@color/textColor"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_edit_24"
+                app:iconSize="16dp"
+                app:iconTint="@color/colorPrimary"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Global Style Strip (Collapsible) -->
+    <LinearLayout
+        android:id="@+id/panelGlobalStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_hero_bento_secondary"
+        android:padding="12dp"
+        android:visibility="gone"
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/str_font_size"
+                android:textColor="@color/textColor"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tvGlobalFontSizeValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="22"
+                android:textColor="@color/colorPrimary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderGlobalFontSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="12.0"
+            android:valueTo="48.0"
+            android:value="22.0"
+            android:stepSize="1.0"
+            app:thumbColor="@color/colorPrimary"
+            app:trackColorActive="@color/colorPrimary" />
+
+        <!-- Color Swatches -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_subtitle_color"
+            android:textColor="@color/textColor"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="6dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <View
+                android:id="@+id/colorWhite"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="#FFFFFF"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/colorYellow"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="#FFEB3B"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/colorCyan"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="#00E5FF"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/colorGold"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="#FFD700"
+                android:layout_marginEnd="10dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <View
+                android:id="@+id/colorRose"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="#FF4081"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Shift Timing Strip (Collapsible) -->
+    <LinearLayout
+        android:id="@+id/panelShiftTiming"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_hero_bento_secondary"
+        android:padding="12dp"
+        android:visibility="gone"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/str_shift_all_subtitles"
+            android:textColor="@color/textColor"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShiftMinus200"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="-0.2s"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textSize="11sp"
+            app:cornerRadius="18dp"
+            android:layout_marginEnd="4dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShiftPlus200"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="+0.2s"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textSize="11sp"
+            app:cornerRadius="18dp" />
+    </LinearLayout>
+
+    <!-- Search & Replace Strip (Collapsible) -->
+    <LinearLayout
+        android:id="@+id/panelSearchReplace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_hero_bento_secondary"
+        android:padding="12dp"
+        android:visibility="gone"
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <EditText
+                android:id="@+id/etSearchWord"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@drawable/tool_button_inactive"
+                android:paddingHorizontal="10dp"
+                android:hint="@string/str_search_hint"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/outline"
+                android:textSize="13sp"
+                android:singleLine="true"
+                android:layout_marginEnd="8dp" />
+
+            <EditText
+                android:id="@+id/etReplaceWord"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@drawable/tool_button_inactive"
+                android:paddingHorizontal="10dp"
+                android:hint="@string/str_replace_hint"
+                android:textColor="@color/textColor"
+                android:textColorHint="@color/outline"
+                android:textSize="13sp"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnApplyReplaceAll"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="@string/str_replace_all"
+            android:textAllCaps="false"
+            android:textSize="13sp"
+            android:textColor="@color/onPrimaryContainer"
+            android:backgroundTint="@color/colorPrimary"
+            app:cornerRadius="20dp" />
+    </LinearLayout>
+
+    <!-- Subtitle Cues RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBulkSubtitleCues"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+    <!-- Bottom Action Footer -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancelBulkSubtitles"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/cancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textColor="@color/textColorSecondary"
+            app:strokeColor="@color/outline"
+            app:cornerRadius="24dp"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveBulkSubtitles"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/str_apply_to_all_subtitles"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            app:cornerRadius="24dp"
+            android:textAllCaps="false"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+</LinearLayout>

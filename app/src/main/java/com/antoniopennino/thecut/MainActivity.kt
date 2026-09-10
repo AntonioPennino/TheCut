@@ -34,6 +34,7 @@ import java.net.URL
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var currentTabIndex = 0
     private val selectVideoLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             if (uri != null) {
@@ -261,6 +262,11 @@ class MainActivity : AppCompatActivity() {
         val isFirstLaunch = prefs.getBoolean("first_launch_v1", true)
         if (isFirstLaunch) {
             showOnboardingDialog(prefs)
+        }
+
+        val savedTab = savedInstanceState?.getInt("CURRENT_TAB_INDEX", 0) ?: 0
+        if (savedTab != 0) {
+            switchTab(savedTab)
         }
 
         // Load saved recent projects automatically
@@ -495,7 +501,13 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("CURRENT_TAB_INDEX", currentTabIndex)
+    }
+
     private fun switchTab(tabIndex: Int) {
+        currentTabIndex = tabIndex
         val activeBg = ContextCompat.getDrawable(this, R.drawable.bg_nav_active_pill)
         val attrs = intArrayOf(android.R.attr.selectableItemBackgroundBorderless)
         val ta = obtainStyledAttributes(attrs)

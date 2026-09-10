@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_hero_bento_secondary"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp">
+
+    <!-- Top line: Index, Time badge, and action icons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvCueIndex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="#1"
+            android:textColor="@color/colorPrimary"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:background="@drawable/rounded_time_bg" />
+
+        <TextView
+            android:id="@+id/tvCueTimeRange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="00:01.20 --> 00:03.50"
+            android:textColor="@color/textColorSecondary"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btnPlayCue"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_play_24"
+            android:scaleType="fitCenter"
+            android:padding="6dp"
+            app:tint="@color/colorPrimary"
+            android:contentDescription="Play cue" />
+
+        <ImageButton
+            android:id="@+id/btnEditCueDetails"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_edit_24"
+            android:scaleType="fitCenter"
+            android:padding="6dp"
+            app:tint="@color/textColorSecondary"
+            android:contentDescription="Fine-tune cue" />
+
+        <ImageButton
+            android:id="@+id/btnDeleteCue"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete_24"
+            android:scaleType="fitCenter"
+            android:padding="6dp"
+            app:tint="@color/accentRose"
+            android:contentDescription="Delete cue" />
+    </LinearLayout>
+
+    <!-- Subtitle text input -->
+    <EditText
+        android:id="@+id/etCueText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/tool_button_inactive"
+        android:padding="10dp"
+        android:textColor="@color/textColor"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:inputType="textMultiLine"
+        android:minLines="1"
+        android:maxLines="3"
+        android:hint="@string/str_subtitle_text_hint"
+        android:textColorHint="@color/outline" />
+
+</LinearLayout>

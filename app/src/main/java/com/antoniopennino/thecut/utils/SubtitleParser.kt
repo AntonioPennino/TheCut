@@ -52,6 +52,43 @@ object SubtitleParser {
     }
 
     /**
+     * Formats milliseconds into standard SRT timestamp format: HH:mm:ss,SSS
+     */
+    fun formatTime(timeMs: Long): String {
+        val totalSec = timeMs / 1000
+        val ms = timeMs % 1000
+        val sec = totalSec % 60
+        val min = (totalSec / 60) % 60
+        val hour = totalSec / 3600
+        return String.format(java.util.Locale.US, "%02d:%02d:%02d,%03d", hour, min, sec, ms)
+    }
+
+    /**
+     * Formats milliseconds into compact display format: mm:ss.S
+     */
+    fun formatShortTime(timeMs: Long): String {
+        val totalSec = timeMs / 1000
+        val ms = (timeMs % 1000) / 100
+        val sec = totalSec % 60
+        val min = totalSec / 60
+        return String.format(java.util.Locale.US, "%02d:%02d.%d", min, sec, ms)
+    }
+
+    /**
+     * Generates standard SRT file content string from a list of SubtitleCues.
+     */
+    fun generateSrt(cues: List<SubtitleCue>): String {
+        val sb = StringBuilder()
+        val sortedCues = cues.sortedBy { it.startTimeMs }
+        for ((index, cue) in sortedCues.withIndex()) {
+            sb.append(index + 1).append("\n")
+            sb.append(formatTime(cue.startTimeMs)).append(" --> ").append(formatTime(cue.endTimeMs)).append("\n")
+            sb.append(cue.text.trim()).append("\n\n")
+        }
+        return sb.toString().trim()
+    }
+
+    /**
      * Parses time format: hh:mm:ss,ms or hh:mm:ss.ms or mm:ss.ms
      */
     private fun parseTime(timeStr: String): Long {

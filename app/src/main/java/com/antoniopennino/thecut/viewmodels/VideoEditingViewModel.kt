@@ -607,8 +607,17 @@ class VideoEditingViewModel : ViewModel() {
                                 }
                             }
 
-                            val boxPart = ":box=1:boxcolor='0x00000080':boxborderw=$boxBorderW"
-                            val filterExpr = "drawtext=${fontPart}text='$escapedLine':fontcolor='white':fontsize=${scaledFontSize}:${posPart}${boxPart}$enablePart"
+                            val fontColorStr = if (op.color.startsWith("#")) op.color else "white"
+                            val boxPart = if (op.backgroundColor != "none") {
+                                val boxColorStr = if (op.backgroundColor.startsWith("#")) {
+                                    try {
+                                        val c = android.graphics.Color.parseColor(op.backgroundColor)
+                                        String.format("0x%02X%02X%02X%02X", android.graphics.Color.red(c), android.graphics.Color.green(c), android.graphics.Color.blue(c), android.graphics.Color.alpha(c))
+                                    } catch (e: Exception) { "0x00000080" }
+                                } else "0x00000080"
+                                ":box=1:boxcolor='$boxColorStr':boxborderw=$boxBorderW"
+                            } else ""
+                            val filterExpr = "drawtext=${fontPart}text='$escapedLine':fontcolor='$fontColorStr':fontsize=${scaledFontSize}:${posPart}${boxPart}$enablePart"
                             
                             val nextLabel = "[v$stageIndex]"
                             stages.add("$currentLabel$filterExpr$nextLabel")

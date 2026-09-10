@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_nav_docked"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_alignParentStart="true">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_cut_24"
+                app:tint="@color/colorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/str_cut_silence_title"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnCloseCutSilences"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close_24"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            app:tint="@color/textColorSecondary"
+            android:contentDescription="Close" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/str_cut_silence_desc"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="13sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Noise Threshold Slider -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvNoiseThresholdLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/str_noise_threshold"
+                android:textColor="@color/textColor"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tvNoiseThresholdValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-34 dB"
+                android:textColor="@color/colorPrimary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderNoiseThreshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="-50.0"
+            android:valueTo="-20.0"
+            android:value="-34.0"
+            android:stepSize="1.0"
+            app:thumbColor="@color/colorPrimary"
+            app:trackColorActive="@color/colorPrimary"
+            app:trackColorInactive="@color/outline" />
+    </LinearLayout>
+
+    <!-- Min Silence Duration Slider -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvMinSilenceLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/str_min_silence_duration"
+                android:textColor="@color/textColor"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tvMinSilenceValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.35 s"
+                android:textColor="@color/colorPrimary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderMinSilenceDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="0.20"
+            android:valueTo="1.20"
+            android:value="0.35"
+            android:stepSize="0.05"
+            app:thumbColor="@color/colorPrimary"
+            app:trackColorActive="@color/colorPrimary"
+            app:trackColorInactive="@color/outline" />
+    </LinearLayout>
+
+    <!-- Safety Padding Slider -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvSafetyPaddingLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/str_safety_padding"
+                android:textColor="@color/textColor"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tvSafetyPaddingValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="100 ms"
+                android:textColor="@color/colorPrimary"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderSafetyPadding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="40.0"
+            android:valueTo="250.0"
+            android:value="100.0"
+            android:stepSize="10.0"
+            app:thumbColor="@color/colorPrimary"
+            app:trackColorActive="@color/colorPrimary"
+            app:trackColorInactive="@color/outline" />
+    </LinearLayout>
+
+    <!-- Analysis Results Card -->
+    <LinearLayout
+        android:id="@+id/cardSilenceResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_hero_bento_secondary"
+        android:padding="14dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tvSilenceStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_silence_ready_to_analyze"
+            android:textColor="@color/textColor"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <ProgressBar
+            android:id="@+id/pbSilenceAnalyzing"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:indeterminate="true"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAnalyzeSilences"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/str_analyze_silences"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPrimary"
+            app:strokeColor="@color/colorPrimary"
+            app:cornerRadius="24dp"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnApplyCutSilences"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="@string/str_apply_silence_cut"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            app:cornerRadius="24dp"
+            android:textAllCaps="false"
+            android:enabled="false"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+</LinearLayout>

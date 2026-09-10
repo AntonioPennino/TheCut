@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_bottom_nav_docked"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvSingleCueTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/str_edit_cue_title"
+                android:textColor="@color/textColor"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvSingleCueTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="00:01.20 --> 00:03.50"
+                android:textColor="@color/colorPrimary"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:background="@drawable/rounded_time_bg" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnCloseSingleCue"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close_24"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            app:tint="@color/textColorSecondary"
+            android:contentDescription="Close" />
+    </RelativeLayout>
+
+    <!-- Cue Text Input -->
+    <EditText
+        android:id="@+id/etSingleCueText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_hero_bento_secondary"
+        android:padding="14dp"
+        android:textColor="@color/textColor"
+        android:textSize="15sp"
+        android:fontFamily="sans-serif"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:maxLines="4"
+        android:hint="@string/str_subtitle_text_hint"
+        android:textColorHint="@color/outline"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Timing Adjustment Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <!-- Inizio (Start Time) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="6dp">
+
+            <TextView
+                android:id="@+id/tvStartTimeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_start_time"
+                android:textColor="@color/textColorSecondary"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/rounded_time_bg"
+                android:paddingHorizontal="4dp">
+
+                <ImageButton
+                    android:id="@+id/btnStartMinus100"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_left_24"
+                    android:scaleType="fitCenter"
+                    android:padding="4dp"
+                    app:tint="@color/textColor"
+                    android:contentDescription="Minus 100ms" />
+
+                <TextView
+                    android:id="@+id/tvStartTimeVal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="00:01.20"
+                    android:textColor="@color/textColor"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <ImageButton
+                    android:id="@+id/btnStartPlus100"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_right_24"
+                    android:scaleType="fitCenter"
+                    android:padding="4dp"
+                    app:tint="@color/textColor"
+                    android:contentDescription="Plus 100ms" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Fine (End Time) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="6dp">
+
+            <TextView
+                android:id="@+id/tvEndTimeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/str_end_time"
+                android:textColor="@color/textColorSecondary"
+                android:textSize="12sp"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/rounded_time_bg"
+                android:paddingHorizontal="4dp">
+
+                <ImageButton
+                    android:id="@+id/btnEndMinus100"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_left_24"
+                    android:scaleType="fitCenter"
+                    android:padding="4dp"
+                    app:tint="@color/textColor"
+                    android:contentDescription="Minus 100ms" />
+
+                <TextView
+                    android:id="@+id/tvEndTimeVal"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="00:03.50"
+                    android:textColor="@color/textColor"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <ImageButton
+                    android:id="@+id/btnEndPlus100"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_right_24"
+                    android:scaleType="fitCenter"
+                    android:padding="4dp"
+                    app:tint="@color/textColor"
+                    android:contentDescription="Plus 100ms" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Quick Tools Row: Preview, Split, Delete -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPreviewSingleCue"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="@string/str_listen_cue"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:textColor="@color/colorPrimary"
+            app:strokeColor="@color/colorPrimary"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_play_24"
+            app:iconSize="16dp"
+            app:iconTint="@color/colorPrimary"
+            android:layout_marginEnd="6dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSplitSingleCue"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="@string/str_split_cue"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:textColor="@color/textColor"
+            app:strokeColor="@color/outline"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_cut_24"
+            app:iconSize="16dp"
+            app:iconTint="@color/textColor"
+            android:layout_marginEnd="6dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteSingleCue"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/str_remove"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textAllCaps="false"
+            android:textSize="12sp"
+            android:textColor="@color/accentRose"
+            app:strokeColor="@color/accentRose"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_delete_24"
+            app:iconSize="16dp"
+            app:iconTint="@color/accentRose" />
+    </LinearLayout>
+
+    <!-- Save Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSaveSingleCue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/str_save"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        app:cornerRadius="24dp"
+        android:textAllCaps="false" />
+
+</LinearLayout>

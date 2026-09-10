@@ -15,6 +15,7 @@
 
         <!-- Top Action Bar -->
         <LinearLayout
+            android:id="@+id/topActionBar"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:orientation="horizontal"
@@ -119,9 +120,17 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Video Player Frame Container -->
-        <FrameLayout
-            android:id="@+id/playerContainer"
+        <!-- Portrait Studio Container (Active in Portrait) -->
+        <LinearLayout
+            android:id="@+id/portraitContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Video Player Frame Container -->
+            <FrameLayout
+                android:id="@+id/playerContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -269,6 +278,7 @@
             android:paddingBottom="4dp">
 
             <LinearLayout
+                android:id="@+id/transportControlsBar"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:orientation="horizontal"
@@ -556,9 +566,15 @@
                 android:layout_marginBottom="4dp" />
         </LinearLayout>
 
-        <!-- Text Editing Toolbar (inline mode, hidden by default) -->
-        <include
-            android:id="@+id/textEditingToolbar"
+        <!-- Toolbars Container (Group of all inline editing toolbars and bottom dock) -->
+        <FrameLayout
+            android:id="@+id/toolbarsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Text Editing Toolbar (inline mode, hidden by default) -->
+            <include
+                android:id="@+id/textEditingToolbar"
             layout="@layout/text_editing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -833,6 +849,35 @@
                         android:textColor="@color/toolTextInactive"/>
                 </LinearLayout>
 
+                <!-- Cut Silences -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:minWidth="64dp"
+                    android:paddingHorizontal="4dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <ImageButton
+                        android:id="@+id/btnCutSilences"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/tool_button_inactive"
+                        android:src="@drawable/ic_cut_24"
+                        android:padding="8dp"
+                        android:scaleType="fitCenter"
+                        app:tint="@color/toolTextInactive" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/str_cut_silence_short"
+                        android:textSize="11sp"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/toolTextInactive"/>
+                </LinearLayout>
+
                 <!-- Crop -->
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -893,7 +938,71 @@
 
             </LinearLayout>
         </HorizontalScrollView>
+        </FrameLayout>
     </LinearLayout>
+
+    <!-- Landscape Studio Container (Side-by-Side DaVinci / LumaFusion Workstation) -->
+    <LinearLayout
+        android:id="@+id/landscapeContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <!-- Left Studio Pane: Video Monitor and Left-Thumb Transport Bar -->
+        <LinearLayout
+            android:id="@+id/landscapeLeftPane"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="44"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="6dp">
+
+            <!-- Holds playerContainer in Landscape -->
+            <FrameLayout
+                android:id="@+id/landscapePlayerHolder"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Holds transportControlsBar in Landscape -->
+            <FrameLayout
+                android:id="@+id/landscapeTransportHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Right Studio Pane: Multi-Track Timeline and Right-Thumb Toolbars Dock -->
+        <LinearLayout
+            android:id="@+id/landscapeRightPane"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="56"
+            android:orientation="vertical"
+            android:paddingStart="6dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="6dp">
+
+            <!-- Holds timelineContainer in Landscape -->
+            <FrameLayout
+                android:id="@+id/landscapeTimelineHolder"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Holds toolbarsContainer in Landscape -->
+            <FrameLayout
+                android:id="@+id/landscapeToolbarsHolder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
 
     <include
         android:id="@+id/handwritingPanel"

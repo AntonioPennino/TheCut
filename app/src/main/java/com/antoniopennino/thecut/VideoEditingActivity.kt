@@ -1,5 +1,6 @@
 package com.antoniopennino.thecut
 
+import android.content.res.Configuration
 import android.widget.ImageView
 import kotlinx.coroutines.isActive
 import android.annotation.SuppressLint
@@ -30,6 +31,8 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.EditText
+import android.widget.ProgressBar
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -74,6 +77,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import com.antoniopennino.thecut.utils.SilenceDetector
+import com.antoniopennino.thecut.utils.AutoSubtitleHelper
+import com.antoniopennino.thecut.utils.SubtitleParser
+import com.antoniopennino.thecut.adapters.BulkSubtitlesAdapter
 
 
 @Suppress("DEPRECATION")
@@ -597,6 +604,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
         // Initialize UI components
         initializeViews()
+        applyOrientationLayout(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
         setupExoPlayer()
         setupCustomSeeker()
         setupHandwritingControls()
@@ -1402,6 +1410,9 @@ class VideoEditingActivity : AppCompatActivity() {
                 toolbar.findViewById<ImageButton>(R.id.btnVideoSplit)?.setBounceClickListener {
                     splitSelectedVideo()
                 }
+                toolbar.findViewById<ImageButton>(R.id.btnVideoCutSilences)?.setBounceClickListener {
+                    showCutSilencesDialog()
+                }
                 toolbar.findViewById<ImageButton>(R.id.btnVideoTrim)?.setBounceClickListener {
                     selectedVideoIndex?.let { index ->
                         val items = getSequenceItems()
@@ -1849,8 +1860,20 @@ class VideoEditingActivity : AppCompatActivity() {
                 toolbar.findViewById<ImageButton>(R.id.btnCloseSubtitlesSheet)?.setBounceClickListener {
                     exitSubtitlesEditingMode()
                 }
+                toolbar.findViewById<Button>(R.id.btnAutoGenerateSubtitles)?.setBounceClickListener {
+                    generateAutoSubtitles()
+                }
                 toolbar.findViewById<Button>(R.id.btnUploadSrt)?.setBounceClickListener {
                     pickSrtFile()
+                }
+                toolbar.findViewById<View>(R.id.btnBulkEditSubtitles)?.setBounceClickListener {
+                    showBulkSubtitlesDialog()
+                }
+                toolbar.findViewById<View>(R.id.btnEditCurrentCue)?.setBounceClickListener {
+                    showCurrentSubtitleCueDialog()
+                }
+                toolbar.findViewById<View>(R.id.btnExportSrt)?.setBounceClickListener {
+                    exportSubtitlesAsSrt()
                 }
                 toolbar.findViewById<View>(R.id.btnChangeSrt)?.setBounceClickListener {
                     pickSrtFile()
@@ -1992,6 +2015,11 @@ class VideoEditingActivity : AppCompatActivity() {
             subtitlesAction()
         }
 
+        findViewById<ImageButton>(R.id.btnCutSilences)?.setBounceClickListener {
+            setActiveToolButton(R.id.btnCutSilences)
+            showCutSilencesDialog()
+        }
+
         findViewById<ImageButton>(R.id.btnVoiceOver)?.setBounceClickListener {
             setActiveToolButton(R.id.btnVoiceOver)
             voiceOverAction()
@@ -2094,7 +2122,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
     private fun setActiveToolButton(activeId: Int) {
         if (isShowingPreview) dismissPreview()
-        val toolIds = listOf(R.id.btnText, R.id.btnMediaOverlay, R.id.btnDraw, R.id.btnAudio, R.id.btnCrop, R.id.btnSubtitles, R.id.btnVoiceOver, R.id.btnCanvasBackground)
+        val toolIds = listOf(R.id.btnText, R.id.btnMediaOverlay, R.id.btnDraw, R.id.btnAudio, R.id.btnCrop, R.id.btnSubtitles, R.id.btnCutSilences, R.id.btnVoiceOver, R.id.btnCanvasBackground)
         for (id in toolIds) {
             val btn = findViewById<ImageButton>(id) ?: continue
             btn.setBackgroundResource(if (id == activeId) R.drawable.tool_button_active else R.drawable.tool_button_inactive)
@@ -3285,6 +3313,491 @@ class VideoEditingActivity : AppCompatActivity() {
         }
         
         Toast.makeText(this, R.string.toast_subtitles_removed, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun generateAutoSubtitles() {
+        if (!::tempInputFile.isInitialized && videoUri == null) {
+            Toast.makeText(this, "Nessun video caricato", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val targetUri = videoUri ?: Uri.fromFile(tempInputFile)
+        val durationMs = if (originalMainVideoDurationMs > 0) originalMainVideoDurationMs else player.duration.coerceAtLeast(1000L)
+
+        val progressDialog = android.app.ProgressDialog(this).apply {
+            setMessage("Analisi audio e generazione sottotitoli in corso...")
+            setCancelable(false)
+            show()
+        }
+
+        AutoSubtitleHelper.generateAutoSubtitles(
+            context = this,
+            mediaUri = targetUri,
+            totalDurationMs = durationMs
+        ) { cues ->
+            runOnUiThread {
+                try {
+                    progressDialog.dismiss()
+                } catch (e: Exception) {}
+
+                if (cues.isEmpty()) {
+                    Toast.makeText(this@VideoEditingActivity, "Nessun segmento vocale rilevato", Toast.LENGTH_SHORT).show()
+                    return@runOnUiThread
+                }
+
+                val srtContent = SubtitleParser.generateSrt(cues)
+                val newSubOp = EditOperation.AddSubtitles(
+                    subtitlesUri = targetUri,
+                    srtContent = srtContent,
+                    fileName = "Sottotitoli Automatici (${cues.size} battute)",
+                    cues = cues,
+                    fontSize = 22,
+                    color = "#FFFFFF"
+                )
+
+                val existing = viewModel.project.value?.operations?.find { it is EditOperation.AddSubtitles }
+                if (existing != null) {
+                    viewModel.updateOperation(newSubOp.copy(id = existing.id))
+                } else {
+                    viewModel.addOperation(newSubOp)
+                }
+
+                textOverlayView?.subtitleOperation = newSubOp
+                textOverlayView?.setSubtitleCues(cues)
+                updateSubtitlesUi()
+                Toast.makeText(this@VideoEditingActivity, "Generati ${cues.size} sottotitoli sincronizzati!", Toast.LENGTH_SHORT).show()
+                showBulkSubtitlesDialog()
+            }
+        }
+    }
+
+    private fun showBulkSubtitlesDialog() {
+        val project = viewModel.project.value
+        val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
+        if (subOp == null || subOp.cues.isEmpty()) {
+            Toast.makeText(this, "Nessun sottotitolo presente da modificare", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val bottomSheet = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_subtitles_bulk_edit, null)
+        bottomSheet.setContentView(view)
+
+        val tvBadge = view.findViewById<TextView>(R.id.tvBulkCueCountBadge)
+        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseBulkSubtitles)
+        val btnAdd = view.findViewById<Button>(R.id.btnAddCue)
+        val btnGlobalStyle = view.findViewById<Button>(R.id.btnToggleGlobalStyle)
+        val btnShiftTiming = view.findViewById<Button>(R.id.btnToggleShiftTiming)
+        val btnSearchReplace = view.findViewById<Button>(R.id.btnToggleSearchReplace)
+        val panelGlobalStyle = view.findViewById<View>(R.id.panelGlobalStyle)
+        val panelShiftTiming = view.findViewById<View>(R.id.panelShiftTiming)
+        val panelSearchReplace = view.findViewById<View>(R.id.panelSearchReplace)
+        val rvCues = view.findViewById<RecyclerView>(R.id.rvBulkSubtitleCues)
+        val btnCancel = view.findViewById<Button>(R.id.btnCancelBulkSubtitles)
+        val btnSave = view.findViewById<Button>(R.id.btnSaveBulkSubtitles)
+
+        val workingCues = subOp.cues.toMutableList()
+        var workingColor = subOp.color
+        var workingFontSize = subOp.fontSize
+
+        fun updateBadge() {
+            tvBadge.text = "${workingCues.size} battute"
+        }
+        updateBadge()
+
+        lateinit var adapter: BulkSubtitlesAdapter
+        adapter = BulkSubtitlesAdapter(
+            cues = workingCues,
+            onPlayCue = { cue ->
+                if (::player.isInitialized) {
+                    player.seekTo(cue.startTimeMs)
+                    player.play()
+                }
+            },
+            onEditCueDetails = { index, cue ->
+                showSingleSubtitleDialog(index) { updatedCue ->
+                    workingCues[index] = updatedCue
+                    adapter.notifyItemChanged(index)
+                    updateBadge()
+                }
+            },
+            onDeleteCue = { index ->
+                if (index in workingCues.indices) {
+                    workingCues.removeAt(index)
+                    adapter.notifyItemRemoved(index)
+                    adapter.notifyItemRangeChanged(index, workingCues.size - index)
+                    updateBadge()
+                }
+            },
+            onTextChanged = { index, newText ->
+                if (index in workingCues.indices) {
+                    workingCues[index] = workingCues[index].copy(text = newText)
+                }
+            }
+        )
+
+        rvCues.layoutManager = LinearLayoutManager(this)
+        rvCues.adapter = adapter
+
+        btnClose.setOnClickListener { bottomSheet.dismiss() }
+        btnCancel.setOnClickListener { bottomSheet.dismiss() }
+
+        // Panels toggle
+        btnGlobalStyle.setOnClickListener {
+            panelGlobalStyle.visibility = if (panelGlobalStyle.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            panelShiftTiming.visibility = View.GONE
+            panelSearchReplace.visibility = View.GONE
+        }
+        btnShiftTiming.setOnClickListener {
+            panelShiftTiming.visibility = if (panelShiftTiming.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            panelGlobalStyle.visibility = View.GONE
+            panelSearchReplace.visibility = View.GONE
+        }
+        btnSearchReplace.setOnClickListener {
+            panelSearchReplace.visibility = if (panelSearchReplace.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            panelGlobalStyle.visibility = View.GONE
+            panelShiftTiming.visibility = View.GONE
+        }
+
+        // Add Cue
+        btnAdd.setOnClickListener {
+            val lastEnd = workingCues.lastOrNull()?.endTimeMs ?: 0L
+            val newStart = lastEnd + 200L
+            val newEnd = newStart + 2500L
+            val newCue = com.antoniopennino.thecut.models.SubtitleCue(newStart, newEnd, "Nuova battuta")
+            workingCues.add(newCue)
+            adapter.notifyItemInserted(workingCues.size - 1)
+            rvCues.scrollToPosition(workingCues.size - 1)
+            updateBadge()
+        }
+
+        // Global Style sliders & swatches
+        val sliderFontSize = view.findViewById<Slider>(R.id.sliderGlobalFontSize)
+        val tvFontSizeVal = view.findViewById<TextView>(R.id.tvGlobalFontSizeValue)
+        sliderFontSize.value = workingFontSize.toFloat().coerceIn(12f, 48f)
+        tvFontSizeVal.text = "$workingFontSize"
+        sliderFontSize.addOnChangeListener { _, value, _ ->
+            workingFontSize = value.toInt()
+            tvFontSizeVal.text = "$workingFontSize"
+        }
+
+        val colorSwatches = mapOf(
+            R.id.colorWhite to "#FFFFFF",
+            R.id.colorYellow to "#FFEB3B",
+            R.id.colorCyan to "#00E5FF",
+            R.id.colorGold to "#FFD700",
+            R.id.colorRose to "#FF4081"
+        )
+        for ((viewId, hexColor) in colorSwatches) {
+            view.findViewById<View>(viewId)?.setOnClickListener {
+                workingColor = hexColor
+                Toast.makeText(this, "Colore selezionato!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Shift timing
+        view.findViewById<Button>(R.id.btnShiftMinus200)?.setOnClickListener {
+            val shifted = AutoSubtitleHelper.shiftAllCues(workingCues, -200L)
+            adapter.updateData(shifted)
+        }
+        view.findViewById<Button>(R.id.btnShiftPlus200)?.setOnClickListener {
+            val shifted = AutoSubtitleHelper.shiftAllCues(workingCues, 200L)
+            adapter.updateData(shifted)
+        }
+
+        // Search & Replace
+        val etSearch = view.findViewById<EditText>(R.id.etSearchWord)
+        val etReplace = view.findViewById<EditText>(R.id.etReplaceWord)
+        view.findViewById<Button>(R.id.btnApplyReplaceAll)?.setOnClickListener {
+            val s = etSearch.text.toString()
+            val r = etReplace.text.toString()
+            if (s.isNotEmpty()) {
+                val replaced = AutoSubtitleHelper.replaceTextInAllCues(workingCues, s, r)
+                adapter.updateData(replaced)
+                Toast.makeText(this, "Sostituzioni effettuate in tutte le battute!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Save
+        btnSave.setOnClickListener {
+            val finalCues = adapter.getCues()
+            val updatedSrt = SubtitleParser.generateSrt(finalCues)
+            val updatedOp = subOp.copy(
+                cues = finalCues,
+                srtContent = updatedSrt,
+                fontSize = workingFontSize,
+                color = workingColor
+            )
+            updateSubtitleOp(updatedOp)
+            textOverlayView?.setSubtitleCues(finalCues)
+            updateSubtitlesUi()
+            bottomSheet.dismiss()
+            Toast.makeText(this, "Tutti i sottotitoli sono stati aggiornati!", Toast.LENGTH_SHORT).show()
+        }
+
+        bottomSheet.show()
+    }
+
+    private fun showCurrentSubtitleCueDialog() {
+        val project = viewModel.project.value
+        val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
+        if (subOp == null || subOp.cues.isEmpty()) {
+            Toast.makeText(this, "Nessun sottotitolo presente", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentPos = getGlobalPosition()
+        val cueIndex = subOp.cues.indexOfFirst { currentPos in it.startTimeMs..it.endTimeMs }
+            .takeIf { it != -1 } ?: 0
+
+        showSingleSubtitleDialog(cueIndex)
+    }
+
+    private fun showSingleSubtitleDialog(cueIndex: Int, onCueUpdated: ((com.antoniopennino.thecut.models.SubtitleCue) -> Unit)? = null) {
+        val project = viewModel.project.value
+        val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles ?: return
+        if (cueIndex !in subOp.cues.indices) return
+
+        val targetCue = subOp.cues[cueIndex]
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_subtitle_single_edit, null)
+        dialog.setContentView(view)
+
+        val tvTitle = view.findViewById<TextView>(R.id.tvSingleCueTitle)
+        val tvTimeBadge = view.findViewById<TextView>(R.id.tvSingleCueTime)
+        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseSingleCue)
+        val etText = view.findViewById<EditText>(R.id.etSingleCueText)
+        val tvStartVal = view.findViewById<TextView>(R.id.tvStartTimeVal)
+        val tvEndVal = view.findViewById<TextView>(R.id.tvEndTimeVal)
+        val btnStartMinus = view.findViewById<ImageButton>(R.id.btnStartMinus100)
+        val btnStartPlus = view.findViewById<ImageButton>(R.id.btnStartPlus100)
+        val btnEndMinus = view.findViewById<ImageButton>(R.id.btnEndMinus100)
+        val btnEndPlus = view.findViewById<ImageButton>(R.id.btnEndPlus100)
+        val btnPreview = view.findViewById<Button>(R.id.btnPreviewSingleCue)
+        val btnSplit = view.findViewById<Button>(R.id.btnSplitSingleCue)
+        val btnDelete = view.findViewById<Button>(R.id.btnDeleteSingleCue)
+        val btnSave = view.findViewById<Button>(R.id.btnSaveSingleCue)
+
+        var currentStart = targetCue.startTimeMs
+        var currentEnd = targetCue.endTimeMs
+
+        tvTitle.text = "Battuta #${cueIndex + 1}"
+        etText.setText(targetCue.text)
+
+        fun updateTimes() {
+            val sStr = SubtitleParser.formatShortTime(currentStart)
+            val eStr = SubtitleParser.formatShortTime(currentEnd)
+            tvStartVal.text = sStr
+            tvEndVal.text = eStr
+            tvTimeBadge.text = "$sStr → $eStr"
+        }
+        updateTimes()
+
+        btnStartMinus.setOnClickListener {
+            currentStart = (currentStart - 100L).coerceAtLeast(0L)
+            updateTimes()
+        }
+        btnStartPlus.setOnClickListener {
+            currentStart = (currentStart + 100L).coerceAtMost(currentEnd - 100L)
+            updateTimes()
+        }
+        btnEndMinus.setOnClickListener {
+            currentEnd = (currentEnd - 100L).coerceAtLeast(currentStart + 100L)
+            updateTimes()
+        }
+        btnEndPlus.setOnClickListener {
+            currentEnd += 100L
+            updateTimes()
+        }
+
+        btnPreview.setOnClickListener {
+            if (::player.isInitialized) {
+                player.seekTo(currentStart)
+                player.play()
+            }
+        }
+
+        btnSplit.setOnClickListener {
+            val splitCues = AutoSubtitleHelper.splitCue(subOp.cues, cueIndex)
+            val updatedOp = subOp.copy(cues = splitCues, srtContent = SubtitleParser.generateSrt(splitCues))
+            updateSubtitleOp(updatedOp)
+            textOverlayView?.setSubtitleCues(splitCues)
+            updateSubtitlesUi()
+            dialog.dismiss()
+            Toast.makeText(this, "Battuta divisa in due!", Toast.LENGTH_SHORT).show()
+        }
+
+        btnDelete.setOnClickListener {
+            val newCues = subOp.cues.toMutableList()
+            if (cueIndex in newCues.indices) {
+                newCues.removeAt(cueIndex)
+                val updatedOp = subOp.copy(cues = newCues, srtContent = SubtitleParser.generateSrt(newCues))
+                updateSubtitleOp(updatedOp)
+                textOverlayView?.setSubtitleCues(newCues)
+                updateSubtitlesUi()
+            }
+            dialog.dismiss()
+            Toast.makeText(this, "Battuta eliminata", Toast.LENGTH_SHORT).show()
+        }
+
+        btnSave.setOnClickListener {
+            val updatedCue = com.antoniopennino.thecut.models.SubtitleCue(currentStart, currentEnd, etText.text.toString())
+            val newCues = subOp.cues.toMutableList()
+            if (cueIndex in newCues.indices) {
+                newCues[cueIndex] = updatedCue
+                val updatedOp = subOp.copy(cues = newCues, srtContent = SubtitleParser.generateSrt(newCues))
+                updateSubtitleOp(updatedOp)
+                textOverlayView?.setSubtitleCues(newCues)
+                updateSubtitlesUi()
+                onCueUpdated?.invoke(updatedCue)
+            }
+            dialog.dismiss()
+            Toast.makeText(this, "Battuta salvata!", Toast.LENGTH_SHORT).show()
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
+
+    private fun exportSubtitlesAsSrt() {
+        val project = viewModel.project.value
+        val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
+        if (subOp == null || subOp.cues.isEmpty()) {
+            Toast.makeText(this, "Nessun sottotitolo da esportare", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val srtText = SubtitleParser.generateSrt(subOp.cues)
+            val exportDir = getExternalFilesDir(android.os.Environment.DIRECTORY_DOCUMENTS) ?: filesDir
+            val srtFile = File(exportDir, "thecut_subtitles_${System.currentTimeMillis()}.srt")
+            srtFile.writeText(srtText)
+
+            val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                this@VideoEditingActivity,
+                "${packageName}.fileprovider",
+                srtFile
+            )
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_STREAM, fileUri)
+                putExtra(Intent.EXTRA_SUBJECT, "TheCut Sottotitoli .SRT")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(shareIntent, "Esporta Sottotitoli SRT"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Errore durante l'esportazione: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showCutSilencesDialog() {
+        val targetIndex = selectedVideoIndex ?: 0
+        val sequenceItems = getSequenceItems()
+        if (targetIndex !in sequenceItems.indices) {
+            Toast.makeText(this, "Nessun video valido per il taglio silenzi", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val targetClip = sequenceItems[targetIndex]
+        val clipStartMs = targetClip.trimStartMs
+        val clipEndMs = targetClip.trimEndMs
+        val clipDurationMs = targetClip.trimmedDurationMs
+
+        val bottomSheet = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_cut_silences, null)
+        bottomSheet.setContentView(view)
+
+        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseCutSilences)
+        val sliderThreshold = view.findViewById<Slider>(R.id.sliderNoiseThreshold)
+        val tvThresholdVal = view.findViewById<TextView>(R.id.tvNoiseThresholdValue)
+        val sliderMinDuration = view.findViewById<Slider>(R.id.sliderMinSilenceDuration)
+        val tvMinDurationVal = view.findViewById<TextView>(R.id.tvMinSilenceValue)
+        val sliderPadding = view.findViewById<Slider>(R.id.sliderSafetyPadding)
+        val tvPaddingVal = view.findViewById<TextView>(R.id.tvSafetyPaddingValue)
+        val tvStatus = view.findViewById<TextView>(R.id.tvSilenceStatus)
+        val pbAnalyzing = view.findViewById<ProgressBar>(R.id.pbSilenceAnalyzing)
+        val btnAnalyze = view.findViewById<Button>(R.id.btnAnalyzeSilences)
+        val btnApply = view.findViewById<Button>(R.id.btnApplyCutSilences)
+
+        var detectedSilences: List<com.antoniopennino.thecut.utils.SilenceInterval> = emptyList()
+        var calculatedSpeechSegments: List<com.antoniopennino.thecut.utils.SpeechInterval> = emptyList()
+
+        sliderThreshold.addOnChangeListener { _, value, _ ->
+            tvThresholdVal.text = "${value.toInt()} dB"
+            btnApply.isEnabled = false
+        }
+        sliderMinDuration.addOnChangeListener { _, value, _ ->
+            tvMinDurationVal.text = String.format(Locale.US, "%.2f s", value)
+            btnApply.isEnabled = false
+        }
+        sliderPadding.addOnChangeListener { _, value, _ ->
+            tvPaddingVal.text = "${value.toInt()} ms"
+            if (detectedSilences.isNotEmpty()) {
+                calculatedSpeechSegments = SilenceDetector.calculateSpeechSegments(
+                    clipStartMs, clipEndMs, detectedSilences, value.toLong()
+                )
+                val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
+                tvStatus.text = "Trovati ${detectedSilences.size} silenzi.\nRimosso totale: ${String.format(Locale.US, "%.2f", totalRemovedMs / 1000.0)}s (${calculatedSpeechSegments.size} segmenti conservati)"
+                btnApply.isEnabled = detectedSilences.isNotEmpty()
+            }
+        }
+
+        btnClose.setOnClickListener { bottomSheet.dismiss() }
+
+        fun runAnalysis() {
+            pbAnalyzing.visibility = View.VISIBLE
+            btnAnalyze.isEnabled = false
+            btnApply.isEnabled = false
+            tvStatus.text = "Scansione silenzi audio in corso con FFmpeg..."
+
+            val thresholdDb = sliderThreshold.value.toInt()
+            val minDurationSec = sliderMinDuration.value
+            val paddingMs = sliderPadding.value.toLong()
+
+            SilenceDetector.detectSilences(
+                context = this@VideoEditingActivity,
+                mediaUri = targetClip.uri,
+                totalDurationMs = targetClip.durationMs,
+                thresholdDb = thresholdDb,
+                minDurationSec = minDurationSec
+            ) { silences ->
+                runOnUiThread {
+                    pbAnalyzing.visibility = View.GONE
+                    btnAnalyze.isEnabled = true
+                    detectedSilences = silences.filter { it.startMs >= clipStartMs && it.endMs <= clipEndMs }
+                    calculatedSpeechSegments = SilenceDetector.calculateSpeechSegments(
+                        clipStartMs, clipEndMs, detectedSilences, paddingMs
+                    )
+
+                    if (detectedSilences.isEmpty()) {
+                        tvStatus.text = "Nessun silenzio significativo rilevato con questi parametri.\nProva a impostare la soglia a -30 dB o ridurre la durata minima a 0.25s."
+                        btnApply.isEnabled = false
+                    } else {
+                        val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
+                        val removedSec = totalRemovedMs / 1000.0
+                        tvStatus.text = "Trovati ${detectedSilences.size} silenzi!\nTempo totale rimosso: ${String.format(Locale.US, "%.2f", removedSec)}s\nSegmenti vocali conservati: ${calculatedSpeechSegments.size}"
+                        btnApply.isEnabled = true
+                    }
+                }
+            }
+        }
+
+        btnAnalyze.setOnClickListener { runAnalysis() }
+
+        btnApply.setOnClickListener {
+            if (calculatedSpeechSegments.isNotEmpty()) {
+                viewModel.applySilenceCut(targetIndex, calculatedSpeechSegments, targetClip.uri, targetClip.durationMs)
+                bottomSheet.dismiss()
+                val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
+                val removedSec = totalRemovedMs / 1000.0
+                Toast.makeText(this@VideoEditingActivity, "Rimossi ${detectedSilences.size} silenzi (-${String.format(Locale.US, "%.1f", removedSec)}s)!", Toast.LENGTH_LONG).show()
+                if (::player.isInitialized) {
+                    player.seekTo(0)
+                }
+                customVideoSeeker.invalidate()
+            }
+        }
+
+        bottomSheet.show()
     }
 
     private fun mediaOverlayAction() {
@@ -7463,10 +7976,209 @@ class VideoEditingActivity : AppCompatActivity() {
         reparentCanvasContainer(playerContainer)
     }
 
+    private var isLandscapeMode: Boolean = false
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+        applyOrientationLayout(isLandscape)
+    }
+
+    private fun applyOrientationLayout(isLandscape: Boolean) {
+        isLandscapeMode = isLandscape
+        val portraitContainer = findViewById<LinearLayout>(R.id.portraitContainer) ?: return
+        val landscapeContainer = findViewById<LinearLayout>(R.id.landscapeContainer) ?: return
+        val landscapePlayerHolder = findViewById<FrameLayout>(R.id.landscapePlayerHolder) ?: return
+        val landscapeTransportHolder = findViewById<FrameLayout>(R.id.landscapeTransportHolder) ?: return
+        val landscapeTimelineHolder = findViewById<FrameLayout>(R.id.landscapeTimelineHolder) ?: return
+        val landscapeToolbarsHolder = findViewById<FrameLayout>(R.id.landscapeToolbarsHolder) ?: return
+        val landscapeLeftPane = findViewById<LinearLayout>(R.id.landscapeLeftPane)
+        val landscapeRightPane = findViewById<LinearLayout>(R.id.landscapeRightPane)
+        val transportControlsBar = findViewById<LinearLayout>(R.id.transportControlsBar) ?: return
+        val toolbarsContainer = findViewById<FrameLayout>(R.id.toolbarsContainer) ?: return
+        val seekerContainer = findViewById<LinearLayout>(R.id.seekerContainer) ?: return
+        val topActionBar = findViewById<LinearLayout>(R.id.topActionBar)
+        val timelineDivider = findViewById<View>(R.id.timelineDivider)
+        val density = resources.displayMetrics.density
+
+        if (isLandscape) {
+            portraitContainer.visibility = View.GONE
+            landscapeContainer.visibility = View.VISIBLE
+            timelineDivider?.visibility = View.GONE
+
+            // Compact top action bar in landscape (44dp)
+            topActionBar?.let {
+                val lp = it.layoutParams
+                lp.height = (44 * density).toInt()
+                it.layoutParams = lp
+                it.setPadding((12 * density).toInt(), 0, (12 * density).toInt(), 0)
+            }
+
+            // 1. Reparent playerContainer to landscapePlayerHolder
+            reparentView(playerContainer, landscapePlayerHolder)
+            playerContainer.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            ).apply {
+                setMargins(0, 0, 0, 0)
+            }
+
+            // 2. Reparent transportControlsBar to landscapeTransportHolder
+            reparentView(transportControlsBar, landscapeTransportHolder)
+            transportControlsBar.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            transportControlsBar.setPadding(0, 0, 0, 0)
+
+            // 3. Reparent timelineContainer to landscapeTimelineHolder
+            reparentView(timelineContainer, landscapeTimelineHolder)
+            timelineContainer.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            ).apply {
+                setMargins(0, 0, 0, 0)
+            }
+
+            // 4. Reparent toolbarsContainer to landscapeToolbarsHolder
+            reparentView(toolbarsContainer, landscapeToolbarsHolder)
+            toolbarsContainer.layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+
+            // Handle expanded state in landscape
+            val landscapeToolbarsHolder = findViewById<FrameLayout>(R.id.landscapeToolbarsHolder)
+            landscapeLeftPane?.visibility = View.VISIBLE
+            (landscapeLeftPane?.layoutParams as? LinearLayout.LayoutParams)?.let {
+                it.weight = 44f
+                landscapeLeftPane.layoutParams = it
+            }
+            (landscapeRightPane?.layoutParams as? LinearLayout.LayoutParams)?.let {
+                it.weight = 56f
+                landscapeRightPane.layoutParams = it
+            }
+            if (isTimelineExpanded) {
+                landscapeToolbarsHolder?.visibility = View.GONE
+                btnExpandTimeline.setImageResource(R.drawable.ic_collapse_24)
+            } else {
+                landscapeToolbarsHolder?.visibility = View.VISIBLE
+                btnExpandTimeline.setImageResource(R.drawable.ic_expand_24)
+            }
+        } else {
+            landscapeContainer.visibility = View.GONE
+            portraitContainer.visibility = View.VISIBLE
+            toolbarsContainer.visibility = View.VISIBLE
+            timelineDivider?.visibility = View.VISIBLE
+
+            // Normal top action bar in portrait (56dp)
+            topActionBar?.let {
+                val lp = it.layoutParams
+                lp.height = (56 * density).toInt()
+                it.layoutParams = lp
+                it.setPadding((16 * density).toInt(), 0, (16 * density).toInt(), 0)
+            }
+
+            // 1. Reparent playerContainer back to portraitContainer at index 0
+            reparentView(playerContainer, portraitContainer, 0)
+            val lpPlayer = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                if (isTimelineExpanded) (145 * density).toInt() else 0,
+                if (isTimelineExpanded) 0f else 1.0f
+            ).apply {
+                setMargins(
+                    (12 * density).toInt(),
+                    (4 * density).toInt(),
+                    (12 * density).toInt(),
+                    (8 * density).toInt()
+                )
+            }
+            playerContainer.layoutParams = lpPlayer
+
+            // 2. Reparent transportControlsBar back to seekerContainer at index 0
+            reparentView(transportControlsBar, seekerContainer, 0)
+            transportControlsBar.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (48 * density).toInt()
+            ).apply {
+                setMargins(0, 0, 0, (4 * density).toInt())
+            }
+            transportControlsBar.setPadding((12 * density).toInt(), 0, (12 * density).toInt(), 0)
+
+            // 3. Reparent timelineContainer back to seekerContainer at index 1
+            reparentView(timelineContainer, seekerContainer, 1)
+            timelineContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                if (isTimelineExpanded) 0 else (140 * density).toInt(),
+                if (isTimelineExpanded) 1.0f else 0f
+            ).apply {
+                setMargins((8 * density).toInt(), 0, (8 * density).toInt(), 0)
+            }
+
+            // Ensure seekerContainer is at index 1 in portraitContainer
+            reparentView(seekerContainer, portraitContainer, 1)
+            seekerContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                if (isTimelineExpanded) 0 else ViewGroup.LayoutParams.WRAP_CONTENT,
+                if (isTimelineExpanded) 1.0f else 0f
+            )
+
+            // 4. Reparent toolbarsContainer back to portraitContainer at index 2
+            reparentView(toolbarsContainer, portraitContainer, 2)
+            toolbarsContainer.layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+
+            btnExpandTimeline.setImageResource(if (isTimelineExpanded) R.drawable.ic_collapse_24 else R.drawable.ic_expand_24)
+        }
+
+        playerContainer.post {
+            triggerCanvasLayoutUpdate()
+            customVideoSeeker.invalidate()
+        }
+    }
+
+    private fun reparentView(view: View, newParent: ViewGroup, index: Int = -1) {
+        val currentParent = view.parent as? ViewGroup
+        if (currentParent === newParent) {
+            if (index >= 0 && currentParent.indexOfChild(view) != index) {
+                currentParent.removeView(view)
+                val targetIndex = Math.min(index, currentParent.childCount)
+                currentParent.addView(view, targetIndex)
+            }
+            return
+        }
+        currentParent?.removeView(view)
+        if (index >= 0) {
+            val targetIndex = Math.min(index, newParent.childCount)
+            newParent.addView(view, targetIndex)
+        } else {
+            newParent.addView(view)
+        }
+    }
+
     private fun toggleTimelineExpandedMode() {
         isTimelineExpanded = !isTimelineExpanded
-        val seekerContainer = findViewById<LinearLayout>(R.id.seekerContainer)
         val density = resources.displayMetrics.density
+
+        if (isLandscapeMode) {
+            val landscapeToolbarsHolder = findViewById<FrameLayout>(R.id.landscapeToolbarsHolder)
+            if (isTimelineExpanded) {
+                btnExpandTimeline.setImageResource(R.drawable.ic_collapse_24)
+                landscapeToolbarsHolder?.visibility = View.GONE
+            } else {
+                btnExpandTimeline.setImageResource(R.drawable.ic_expand_24)
+                landscapeToolbarsHolder?.visibility = View.VISIBLE
+            }
+            playerContainer.post {
+                triggerCanvasLayoutUpdate()
+                customVideoSeeker.invalidate()
+            }
+            return
+        }
+
+        val seekerContainer = findViewById<LinearLayout>(R.id.seekerContainer)
 
         if (isTimelineExpanded) {
             btnExpandTimeline.setImageResource(R.drawable.ic_collapse_24)
@@ -7512,6 +8224,11 @@ class VideoEditingActivity : AppCompatActivity() {
             lpTimeline.height = (140 * density).toInt()
             lpTimeline.weight = 0f
             timelineContainer.layoutParams = lpTimeline
+        }
+
+        playerContainer.post {
+            triggerCanvasLayoutUpdate()
+            customVideoSeeker.invalidate()
         }
     }
 

@@ -372,14 +372,22 @@ class TextOverlayView @JvmOverloads constructor(
             } else {
                 paint.typeface = android.graphics.Typeface.DEFAULT
             }
-            paint.color = Color.WHITE
+            paint.color = try {
+                if (!subOp?.color.isNullOrBlank()) Color.parseColor(subOp!!.color) else Color.WHITE
+            } catch (e: Exception) { Color.WHITE }
 
+            val showBg = subOp?.backgroundColor != "none"
             val bgPaint = Paint().apply {
                 isAntiAlias = true
                 style = Paint.Style.FILL
-                color = Color.parseColor("#80000000")
+                color = try {
+                    if (!subOp?.backgroundColor.isNullOrBlank() && subOp!!.backgroundColor != "none") {
+                        Color.parseColor(subOp.backgroundColor)
+                    } else {
+                        Color.parseColor("#80000000")
+                    }
+                } catch (e: Exception) { Color.parseColor("#80000000") }
             }
-            val showBg = true
 
             val rectW = videoRect.width()
             val rectH = videoRect.height()
