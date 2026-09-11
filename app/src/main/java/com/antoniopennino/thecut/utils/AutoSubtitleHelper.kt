@@ -42,7 +42,7 @@ object AutoSubtitleHelper {
                         SubtitleCue(
                             startTimeMs = speech.startMs,
                             endTimeMs = speech.endMs,
-                            text = "Battuta ${cues.size + 1}"
+                            text = context.getString(com.antoniopennino.thecut.R.string.str_caption_placeholder, cues.size + 1)
                         )
                     )
                 } else {
@@ -56,7 +56,7 @@ object AutoSubtitleHelper {
                             SubtitleCue(
                                 startTimeMs = start,
                                 endTimeMs = end,
-                                text = "Battuta ${cues.size + 1}"
+                                text = context.getString(com.antoniopennino.thecut.R.string.str_caption_placeholder, cues.size + 1)
                             )
                         )
                     }
@@ -69,7 +69,7 @@ object AutoSubtitleHelper {
                     SubtitleCue(
                         startTimeMs = 0L,
                         endTimeMs = minOf(3000L, totalDurationMs),
-                        text = "Battuta 1"
+                        text = context.getString(com.antoniopennino.thecut.R.string.str_caption_placeholder, 1)
                     )
                 )
             }

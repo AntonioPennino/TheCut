@@ -348,12 +348,12 @@ class VideoEditingActivity : AppCompatActivity() {
                             .setMessage("Are you sure you want to delete '${fontItem.name}'?")
                             .setPositiveButton("Delete") { _, _ ->
                                 if (com.antoniopennino.thecut.utils.FontManager.deleteCustomFont(this, fontItem.path)) {
-                                    Toast.makeText(this, "Font deleted", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, R.string.str_toast_font_deleted, Toast.LENGTH_SHORT).show()
                                     refreshFontList()
                                     textEditingToolbar?.findViewById<View>(R.id.formatSettingsContainer)?.let { setupTextFontSelector(it) }
                                     setupSubtitleFontSelector(subtitlesEditingToolbar)
                                 } else {
-                                    Toast.makeText(this, "Failed to delete font", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, R.string.str_toast_font_delete_failed, Toast.LENGTH_SHORT).show()
                                 }
                             }
                             .setNegativeButton("Cancel", null)
@@ -500,7 +500,7 @@ class VideoEditingActivity : AppCompatActivity() {
                         outputStream.write(json.toByteArray())
                     }
                     viewModel.markProjectSaved()
-                    Toast.makeText(this, "Project saved successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.str_toast_project_saved, Toast.LENGTH_SHORT).show()
                     if (shouldQuitAfterSave) {
                         shouldQuitAfterSave = false
                         finish()
@@ -508,7 +508,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save project", e)
-                Toast.makeText(this, "Failed to save project", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.str_toast_save_project_failed, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -521,12 +521,12 @@ class VideoEditingActivity : AppCompatActivity() {
         if (uri != null) {
             val importedFont = com.antoniopennino.thecut.utils.FontManager.importFontFromUri(this, uri)
             if (importedFont != null) {
-                Toast.makeText(this, "Font '${importedFont.name}' imported", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.str_toast_font_imported, importedFont.name), Toast.LENGTH_SHORT).show()
                 textEditingToolbar?.findViewById<View>(R.id.formatSettingsContainer)?.let { setupTextFontSelector(it) }
                 setupSubtitleFontSelector(subtitlesEditingToolbar)
                 activeFontSelectionCallback?.invoke(importedFont)
             } else {
-                Toast.makeText(this, "Failed to import font file. Must be a valid .ttf or .otf", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.str_toast_font_import_failed, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -1663,7 +1663,7 @@ class VideoEditingActivity : AppCompatActivity() {
                         runOnUiThread {
                             if (beats.isNotEmpty()) {
                                 viewModel.updateOperation(op.copy(beats = beats))
-                                android.widget.Toast.makeText(this@VideoEditingActivity, "Found ${beats.size} beats!", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(this@VideoEditingActivity, getString(R.string.str_toast_beats_found, beats.size), android.widget.Toast.LENGTH_SHORT).show()
                                 toolbar.findViewById<ImageButton>(R.id.btnAudioBeats)?.setColorFilter(getColor(R.color.colorPrimary))
                             } else {
                                 android.widget.Toast.makeText(this@VideoEditingActivity, R.string.toast_no_clear_beats_found, android.widget.Toast.LENGTH_SHORT).show()
@@ -2541,14 +2541,14 @@ class VideoEditingActivity : AppCompatActivity() {
                         if (copyResult == android.view.PixelCopy.SUCCESS) {
                             saveBitmapToGallery(bitmap)
                         } else {
-                            Toast.makeText(this, "Failed to capture frame", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, R.string.str_toast_capture_frame_failed, Toast.LENGTH_SHORT).show()
                         }
                     }, android.os.Handler(android.os.Looper.getMainLooper()))
                 } catch (e: Exception) {
                     e.printStackTrace()
                     tvDuration?.visibility = durationVis
                     tvPreviewBadge?.visibility = badgeVis
-                    Toast.makeText(this, "Failed to capture frame", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.str_toast_capture_frame_failed, Toast.LENGTH_SHORT).show()
                 }
             } else {
                 val canvas = android.graphics.Canvas(bitmap)
@@ -2646,7 +2646,7 @@ class VideoEditingActivity : AppCompatActivity() {
             
             fos?.use {
                 bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
-                Toast.makeText(this, "Frame saved to gallery", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.str_toast_frame_saved, Toast.LENGTH_SHORT).show()
             }
             
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && imageUri != null) {
@@ -2654,7 +2654,7 @@ class VideoEditingActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Failed to save frame", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_save_frame_failed, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -2874,7 +2874,7 @@ class VideoEditingActivity : AppCompatActivity() {
     private fun saveAndCommitHandwriting() {
         val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView) ?: return
         if (canvasView.isEmpty()) {
-            Toast.makeText(this, "Scribble or draw something first!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_draw_something_first, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -2891,7 +2891,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
         val bitmap = canvasView.exportToBitmap(targetWidth, targetHeight)
         if (bitmap == null) {
-            Toast.makeText(this, "Failed to render drawing", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_render_drawing_failed, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -2920,12 +2920,12 @@ class VideoEditingActivity : AppCompatActivity() {
 
             viewModel.addOperation(overlayOp)
             closeHandwritingMode()
-            Toast.makeText(this, "Handwriting layer added to timeline", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_handwriting_added, Toast.LENGTH_SHORT).show()
 
             viewModel.project.value?.let { renderTracks(it) }
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Error saving handwriting: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.str_toast_handwriting_save_error, e.localizedMessage ?: ""), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -3106,7 +3106,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     }
                     
                     isRecordingVoiceOver = true
-                    tvStatus.text = "Recording... Tap to stop"
+                    tvStatus.text = getString(R.string.str_recording_tap_stop)
                     btnToggle.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF4081"))
                     
                     rippleAnimator.start()
@@ -3148,7 +3148,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     btnPlayPause.setImageResource(R.drawable.ic_play_24)
                 }
                 
-                tvStatus.text = "Tap to start recording"
+                tvStatus.text = getString(R.string.str_recording_tap_start)
                 btnToggle.backgroundTintList = null // Reset tint
                 
                 // Add to audio layer
@@ -3277,7 +3277,7 @@ class VideoEditingActivity : AppCompatActivity() {
             try {
                 startActivityForResult(intent, PICK_SRT_REQUEST)
             } catch (e2: android.content.ActivityNotFoundException) {
-                Toast.makeText(this, "No app found to handle this action", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.str_toast_no_app_found, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -3291,7 +3291,7 @@ class VideoEditingActivity : AppCompatActivity() {
         try {
             startActivityForResult(intent, PICK_BACKGROUND_IMAGE_REQUEST)
         } catch (e: Exception) {
-            Toast.makeText(this, "No app found to handle image selection", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_app_image, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -3317,7 +3317,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
     private fun generateAutoSubtitles() {
         if (!::tempInputFile.isInitialized && videoUri == null) {
-            Toast.makeText(this, "Nessun video caricato", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_video_loaded, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -3325,7 +3325,7 @@ class VideoEditingActivity : AppCompatActivity() {
         val durationMs = if (originalMainVideoDurationMs > 0) originalMainVideoDurationMs else player.duration.coerceAtLeast(1000L)
 
         val progressDialog = android.app.ProgressDialog(this).apply {
-            setMessage("Analisi audio e generazione sottotitoli in corso...")
+            setMessage(getString(R.string.str_analyzing_audio))
             setCancelable(false)
             show()
         }
@@ -3341,7 +3341,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 } catch (e: Exception) {}
 
                 if (cues.isEmpty()) {
-                    Toast.makeText(this@VideoEditingActivity, "Nessun segmento vocale rilevato", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@VideoEditingActivity, R.string.str_toast_no_speech_detected, Toast.LENGTH_SHORT).show()
                     return@runOnUiThread
                 }
 
@@ -3349,7 +3349,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 val newSubOp = EditOperation.AddSubtitles(
                     subtitlesUri = targetUri,
                     srtContent = srtContent,
-                    fileName = "Sottotitoli Automatici (${cues.size} battute)",
+                    fileName = getString(R.string.str_auto_subtitles_title, cues.size),
                     cues = cues,
                     fontSize = 22,
                     color = "#FFFFFF"
@@ -3365,7 +3365,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 textOverlayView?.subtitleOperation = newSubOp
                 textOverlayView?.setSubtitleCues(cues)
                 updateSubtitlesUi()
-                Toast.makeText(this@VideoEditingActivity, "Generati ${cues.size} sottotitoli sincronizzati!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@VideoEditingActivity, getString(R.string.str_toast_subtitles_generated, cues.size), Toast.LENGTH_SHORT).show()
                 showBulkSubtitlesDialog()
             }
         }
@@ -3375,7 +3375,7 @@ class VideoEditingActivity : AppCompatActivity() {
         val project = viewModel.project.value
         val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
         if (subOp == null || subOp.cues.isEmpty()) {
-            Toast.makeText(this, "Nessun sottotitolo presente da modificare", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_subtitles_edit, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -3401,7 +3401,7 @@ class VideoEditingActivity : AppCompatActivity() {
         var workingFontSize = subOp.fontSize
 
         fun updateBadge() {
-            tvBadge.text = "${workingCues.size} battute"
+            tvBadge.text = getString(R.string.str_captions_count, workingCues.size)
         }
         updateBadge()
 
@@ -3491,7 +3491,7 @@ class VideoEditingActivity : AppCompatActivity() {
         for ((viewId, hexColor) in colorSwatches) {
             view.findViewById<View>(viewId)?.setOnClickListener {
                 workingColor = hexColor
-                Toast.makeText(this, "Colore selezionato!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.str_toast_color_selected, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -3514,7 +3514,7 @@ class VideoEditingActivity : AppCompatActivity() {
             if (s.isNotEmpty()) {
                 val replaced = AutoSubtitleHelper.replaceTextInAllCues(workingCues, s, r)
                 adapter.updateData(replaced)
-                Toast.makeText(this, "Sostituzioni effettuate in tutte le battute!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.str_toast_replacements_done, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -3532,7 +3532,7 @@ class VideoEditingActivity : AppCompatActivity() {
             textOverlayView?.setSubtitleCues(finalCues)
             updateSubtitlesUi()
             bottomSheet.dismiss()
-            Toast.makeText(this, "Tutti i sottotitoli sono stati aggiornati!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_subtitles_updated, Toast.LENGTH_SHORT).show()
         }
 
         bottomSheet.show()
@@ -3542,7 +3542,7 @@ class VideoEditingActivity : AppCompatActivity() {
         val project = viewModel.project.value
         val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
         if (subOp == null || subOp.cues.isEmpty()) {
-            Toast.makeText(this, "Nessun sottotitolo presente", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_subtitles, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -3581,7 +3581,7 @@ class VideoEditingActivity : AppCompatActivity() {
         var currentStart = targetCue.startTimeMs
         var currentEnd = targetCue.endTimeMs
 
-        tvTitle.text = "Battuta #${cueIndex + 1}"
+        tvTitle.text = getString(R.string.str_cue_number, cueIndex + 1)
         etText.setText(targetCue.text)
 
         fun updateTimes() {
@@ -3624,7 +3624,7 @@ class VideoEditingActivity : AppCompatActivity() {
             textOverlayView?.setSubtitleCues(splitCues)
             updateSubtitlesUi()
             dialog.dismiss()
-            Toast.makeText(this, "Battuta divisa in due!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_cue_split, Toast.LENGTH_SHORT).show()
         }
 
         btnDelete.setOnClickListener {
@@ -3637,7 +3637,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 updateSubtitlesUi()
             }
             dialog.dismiss()
-            Toast.makeText(this, "Battuta eliminata", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_cue_deleted, Toast.LENGTH_SHORT).show()
         }
 
         btnSave.setOnClickListener {
@@ -3652,7 +3652,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 onCueUpdated?.invoke(updatedCue)
             }
             dialog.dismiss()
-            Toast.makeText(this, "Battuta salvata!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_cue_saved, Toast.LENGTH_SHORT).show()
         }
 
         btnClose.setOnClickListener { dialog.dismiss() }
@@ -3663,7 +3663,7 @@ class VideoEditingActivity : AppCompatActivity() {
         val project = viewModel.project.value
         val subOp = project?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
         if (subOp == null || subOp.cues.isEmpty()) {
-            Toast.makeText(this, "Nessun sottotitolo da esportare", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_subtitles_export, Toast.LENGTH_SHORT).show()
             return
         }
         try {
@@ -3683,9 +3683,9 @@ class VideoEditingActivity : AppCompatActivity() {
                 putExtra(Intent.EXTRA_SUBJECT, "TheCut Sottotitoli .SRT")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            startActivity(Intent.createChooser(shareIntent, "Esporta Sottotitoli SRT"))
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.str_export_srt_chooser)))
         } catch (e: Exception) {
-            Toast.makeText(this, "Errore durante l'esportazione: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.str_toast_export_error, e.message ?: ""), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -3693,7 +3693,7 @@ class VideoEditingActivity : AppCompatActivity() {
         val targetIndex = selectedVideoIndex ?: 0
         val sequenceItems = getSequenceItems()
         if (targetIndex !in sequenceItems.indices) {
-            Toast.makeText(this, "Nessun video valido per il taglio silenzi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_video_for_silence, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -3736,7 +3736,12 @@ class VideoEditingActivity : AppCompatActivity() {
                     clipStartMs, clipEndMs, detectedSilences, value.toLong()
                 )
                 val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
-                tvStatus.text = "Trovati ${detectedSilences.size} silenzi.\nRimosso totale: ${String.format(Locale.US, "%.2f", totalRemovedMs / 1000.0)}s (${calculatedSpeechSegments.size} segmenti conservati)"
+                tvStatus.text = getString(
+                    R.string.str_silence_preview,
+                    detectedSilences.size,
+                    String.format(Locale.US, "%.2f", totalRemovedMs / 1000.0),
+                    calculatedSpeechSegments.size
+                )
                 btnApply.isEnabled = detectedSilences.isNotEmpty()
             }
         }
@@ -3747,7 +3752,7 @@ class VideoEditingActivity : AppCompatActivity() {
             pbAnalyzing.visibility = View.VISIBLE
             btnAnalyze.isEnabled = false
             btnApply.isEnabled = false
-            tvStatus.text = "Scansione silenzi audio in corso con FFmpeg..."
+            tvStatus.text = getString(R.string.str_silence_scanning)
 
             val thresholdDb = sliderThreshold.value.toInt()
             val minDurationSec = sliderMinDuration.value
@@ -3769,12 +3774,17 @@ class VideoEditingActivity : AppCompatActivity() {
                     )
 
                     if (detectedSilences.isEmpty()) {
-                        tvStatus.text = "Nessun silenzio significativo rilevato con questi parametri.\nProva a impostare la soglia a -30 dB o ridurre la durata minima a 0.25s."
+                        tvStatus.text = getString(R.string.str_silence_none)
                         btnApply.isEnabled = false
                     } else {
                         val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
                         val removedSec = totalRemovedMs / 1000.0
-                        tvStatus.text = "Trovati ${detectedSilences.size} silenzi!\nTempo totale rimosso: ${String.format(Locale.US, "%.2f", removedSec)}s\nSegmenti vocali conservati: ${calculatedSpeechSegments.size}"
+                        tvStatus.text = getString(
+                            R.string.str_silence_result,
+                            detectedSilences.size,
+                            String.format(Locale.US, "%.2f", removedSec),
+                            calculatedSpeechSegments.size
+                        )
                         btnApply.isEnabled = true
                     }
                 }
@@ -3789,7 +3799,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 bottomSheet.dismiss()
                 val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
                 val removedSec = totalRemovedMs / 1000.0
-                Toast.makeText(this@VideoEditingActivity, "Rimossi ${detectedSilences.size} silenzi (-${String.format(Locale.US, "%.1f", removedSec)}s)!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@VideoEditingActivity, getString(R.string.str_toast_silences_removed, detectedSilences.size, String.format(Locale.US, "%.1f", removedSec)), Toast.LENGTH_LONG).show()
                 if (::player.isInitialized) {
                     player.seekTo(0)
                 }
@@ -3829,7 +3839,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     try {
                         startActivityForResult(intent, PICK_IMAGE_REQUEST)
                     } catch (e2: android.content.ActivityNotFoundException) {
-                        Toast.makeText(this@VideoEditingActivity, "No app found to handle this action", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@VideoEditingActivity, R.string.str_toast_no_app_found, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -4262,7 +4272,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
             } else {
                 trimTrack?.setRange(maxMs, 0, maxMs)
-                tvTrimValue?.text = "Unknown duration"
+                tvTrimValue?.text = getString(R.string.str_unknown_duration)
             }
         }
         if (::player.isInitialized && player.isPlaying) {
@@ -5019,7 +5029,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     try {
                         startActivityForResult(intent, PICK_VIDEO_REQUEST)
                     } catch (e2: android.content.ActivityNotFoundException) {
-                        Toast.makeText(this@VideoEditingActivity, "No app found to handle this action", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@VideoEditingActivity, R.string.str_toast_no_app_found, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -5076,7 +5086,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 isImportLoading = true
                 showLoading("Importing media...")
                 viewModel.addMergeOperation(mergeItems)
-                Toast.makeText(this@VideoEditingActivity, "${mergeItems.size} clip(s) added to sequence", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@VideoEditingActivity, getString(R.string.str_toast_clips_added, mergeItems.size), Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this@VideoEditingActivity, R.string.toast_failed_to_load_selected_video, Toast.LENGTH_SHORT).show()
             }
@@ -5227,7 +5237,7 @@ class VideoEditingActivity : AppCompatActivity() {
                                     cues = cues
                                 )
                             )
-                            Toast.makeText(this@VideoEditingActivity, "Subtitles added: ${cues.size} captions", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@VideoEditingActivity, getString(R.string.str_toast_subtitles_added, cues.size), Toast.LENGTH_SHORT).show()
                             updateSubtitlesUi()
                             textOverlayView?.setSubtitleCues(cues)
                         } else {
@@ -5270,7 +5280,7 @@ class VideoEditingActivity : AppCompatActivity() {
                         )
                         updateCanvasBackgroundPreview()
                     } else {
-                        Toast.makeText(this@VideoEditingActivity, "Failed to load image", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@VideoEditingActivity, R.string.str_toast_load_image_failed, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -5295,7 +5305,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     try {
                         startActivityForResult(intent, PICK_AUDIO_REQUEST)
                     } catch (e2: android.content.ActivityNotFoundException) {
-                        Toast.makeText(this@VideoEditingActivity, "No app found to handle this action", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@VideoEditingActivity, R.string.str_toast_no_app_found, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -5344,7 +5354,7 @@ class VideoEditingActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 androidx.core.app.ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
-                android.widget.Toast.makeText(this, "Please grant notification permission and try exporting again.", android.widget.Toast.LENGTH_LONG).show()
+                android.widget.Toast.makeText(this, R.string.str_toast_grant_notification, android.widget.Toast.LENGTH_LONG).show()
                 return
             }
         }
@@ -5435,7 +5445,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     startService(intent)
                 }
                 
-                Toast.makeText(this@VideoEditingActivity, "Export started in background...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@VideoEditingActivity, R.string.str_toast_export_started, Toast.LENGTH_SHORT).show()
 
             } catch (e: Exception) {
                 tempOutputFile?.let { if (it.exists()) it.delete() }
@@ -5735,7 +5745,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load project", e)
-                Toast.makeText(this, "Failed to load project", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.str_toast_load_project_failed, Toast.LENGTH_SHORT).show()
             }
         } else {
             videoUri = intent.getParcelableExtra("VIDEO_URI")
@@ -7406,10 +7416,10 @@ class VideoEditingActivity : AppCompatActivity() {
         
         if (isMuted) {
             btnMute?.setImageResource(R.drawable.ic_volume_off_24)
-            tvMuteLabel?.text = "Unmute"
+            tvMuteLabel?.text = getString(R.string.str_unmute)
         } else {
             btnMute?.setImageResource(R.drawable.ic_volume_up_24)
-            tvMuteLabel?.text = "Mute"
+            tvMuteLabel?.text = getString(R.string.str_mute)
         }
     }
 
@@ -8647,7 +8657,7 @@ class VideoEditingActivity : AppCompatActivity() {
         fun updateSliderForSelection() {
             if (selectedOptionId == "reset") {
                 slider.visibility = View.INVISIBLE
-                valueLabel.text = "Reset All"
+                valueLabel.text = getString(R.string.str_reset_all)
             } else {
                 slider.visibility = View.VISIBLE
                 val currentVal = getValForOption(selectedOptionId)
@@ -8902,7 +8912,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
         btnEyedropper.setBounceClickListener {
             bottomSheet.hide()
-            Toast.makeText(this@VideoEditingActivity, "Tap a color on the image to pick it", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@VideoEditingActivity, R.string.str_toast_pick_color_hint, Toast.LENGTH_SHORT).show()
             draggableImageOverlay?.isColorPickingMode = true
             draggableImageOverlay?.onColorPicked = { hex ->
                 selectedColor = hex

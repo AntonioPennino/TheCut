@@ -94,9 +94,9 @@ class ErrorDisplayActivity : AppCompatActivity() {
             val url = "https://github.com/tharunbirla/librecuts/issues/new?title=$issueTitle&body=$issueBody"
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                Toast.makeText(this, "Full crash log copied to clipboard!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.str_toast_crash_log_copied, Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                Toast.makeText(this, "Could not open browser. Log copied to clipboard.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.str_toast_open_browser_failed, Toast.LENGTH_LONG).show()
             }
         }
 

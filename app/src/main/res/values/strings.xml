@@ -218,4 +218,73 @@
     <string name="str_end_time">End Time</string>
     <string name="str_listen_cue">Listen</string>
     <string name="str_split_cue">Split</string>
+
+    <!-- Toast / feedback messages (extracted from code) -->
+    <string name="str_toast_no_app_found">No app found to handle this action</string>
+    <string name="str_toast_no_app_image">No app found to handle image selection</string>
+    <string name="str_toast_capture_frame_failed">Failed to capture frame</string>
+    <string name="str_toast_pick_color_hint">Tap a color on the image to pick it</string>
+    <string name="str_toast_subtitles_added">Subtitles added: %1$d captions</string>
+    <string name="str_toast_draw_something_first">Scribble or draw something first!</string>
+    <string name="str_toast_project_saved">Project saved successfully</string>
+    <string name="str_toast_grant_notification">Please grant notification permission and try exporting again.</string>
+    <string name="str_toast_no_project_uri">No project URI provided</string>
+    <string name="str_toast_handwriting_added">Handwriting layer added to timeline</string>
+    <string name="str_toast_crash_log_copied">Full crash log copied to clipboard!</string>
+    <string name="str_toast_frame_saved">Frame saved to gallery</string>
+    <string name="str_toast_beats_found">Found %1$d beats!</string>
+    <string name="str_toast_font_deleted">Font deleted</string>
+    <string name="str_toast_font_imported">Font \'%1$s\' imported</string>
+    <string name="str_toast_save_project_failed">Failed to save project</string>
+    <string name="str_toast_save_frame_failed">Failed to save frame</string>
+    <string name="str_toast_render_drawing_failed">Failed to render drawing</string>
+    <string name="str_toast_parse_project_failed">Failed to parse project</string>
+    <string name="str_toast_load_project_failed">Failed to load project</string>
+    <string name="str_toast_load_image_failed">Failed to load image</string>
+    <string name="str_toast_font_import_failed">Failed to import font file. Must be a valid .ttf or .otf</string>
+    <string name="str_toast_font_delete_failed">Failed to delete font</string>
+    <string name="str_toast_export_started">Export started in background…</string>
+    <string name="str_toast_handwriting_save_error">Error saving handwriting: %1$s</string>
+    <string name="str_toast_load_project_error">Error loading project</string>
+    <string name="str_toast_open_browser_failed">Could not open browser. Log copied to clipboard.</string>
+    <string name="str_toast_clips_added">%1$d clip(s) added to sequence</string>
+    <string name="str_toast_subtitles_updated">All subtitles updated!</string>
+    <string name="str_toast_replacements_done">Replacements applied to all captions!</string>
+    <string name="str_toast_silences_removed">Removed %1$d silences (-%2$ss)</string>
+    <string name="str_toast_no_video_for_silence">No valid video for silence cutting</string>
+    <string name="str_toast_no_video_loaded">No video loaded</string>
+    <string name="str_toast_no_subtitles">No subtitles present</string>
+    <string name="str_toast_no_subtitles_edit">No subtitles to edit</string>
+    <string name="str_toast_no_subtitles_export">No subtitles to export</string>
+    <string name="str_toast_no_speech_detected">No speech segments detected</string>
+    <string name="str_toast_subtitles_generated">Generated %1$d synced subtitles!</string>
+    <string name="str_toast_export_error">Export error: %1$s</string>
+    <string name="str_toast_color_selected">Color selected!</string>
+    <string name="str_toast_cue_saved">Caption saved!</string>
+    <string name="str_toast_cue_deleted">Caption deleted</string>
+    <string name="str_toast_cue_split">Caption split in two!</string>
+
+    <!-- Subtitle / silence UI phrases (extracted from code) -->
+    <string name="str_analyzing_audio">Analyzing audio and generating subtitles…</string>
+    <string name="str_auto_subtitles_title">Auto Subtitles (%1$d captions)</string>
+    <string name="str_captions_count">%1$d captions</string>
+    <string name="str_cue_number">Caption #%1$d</string>
+    <string name="str_export_srt_chooser">Export SRT Subtitles</string>
+    <string name="str_project_modified">Modified: %1$s</string>
+    <string name="str_caption_placeholder">Caption %1$d</string>
+    <string name="str_silence_scanning">Scanning audio silences with FFmpeg…</string>
+    <string name="str_silence_none">No significant silence detected with these parameters.\nTry setting the threshold to -30 dB or reducing the minimum duration to 0.25s.</string>
+    <string name="str_silence_preview">Found %1$d silences.\nTotal removed: %2$ss (%3$d segments kept)</string>
+    <string name="str_silence_result">Found %1$d silences!\nTotal time removed: %2$ss\nSpeech segments kept: %3$d</string>
+
+    <!-- Misc UI phrases (extracted from code) -->
+    <string name="str_recording_tap_stop">Recording… Tap to stop</string>
+    <string name="str_recording_tap_start">Tap to start recording</string>
+    <string name="str_files_all_found">All files found. Ready to edit.</string>
+    <string name="str_files_missing">%1$d file(s) missing. Tap clips below to replace.</string>
+    <string name="str_unknown_duration">Unknown duration</string>
+    <string name="str_unmute">Unmute</string>
+    <string name="str_reset_all">Reset All</string>
+    <string name="str_no_media_files">No media files found.</string>
+    <string name="str_permission_denied_browse">Permission denied. Grant access or browse folders.</string>
 </resources>

@@ -198,7 +198,7 @@ class ProjectImportActivity : AppCompatActivity() {
 
         projectUri = intent.getParcelableExtra("PROJECT_URI")
         if (projectUri == null) {
-            Toast.makeText(this, "No project URI provided", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.str_toast_no_project_uri, Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -234,14 +234,14 @@ class ProjectImportActivity : AppCompatActivity() {
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ProjectImportActivity, "Failed to parse project", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ProjectImportActivity, R.string.str_toast_parse_project_failed, Toast.LENGTH_SHORT).show()
                         finish()
                     }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading project", e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(this@ProjectImportActivity, "Error loading project", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ProjectImportActivity, R.string.str_toast_load_project_error, Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
@@ -431,7 +431,7 @@ class ProjectImportActivity : AppCompatActivity() {
 
         if (missingCount == 0) {
             tvOverallProgress.setTextColor(ContextCompat.getColor(this, R.color.colorSecondary))
-            tvProjectStatus.text = "All files found. Ready to edit."
+            tvProjectStatus.text = getString(R.string.str_files_all_found)
             tvProjectStatus.setTextColor(ContextCompat.getColor(this, R.color.colorSecondary))
             
             btnNext.isEnabled = true
@@ -439,7 +439,7 @@ class ProjectImportActivity : AppCompatActivity() {
             btnNext.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorPrimary))
         } else {
             tvOverallProgress.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
-            tvProjectStatus.text = "$missingCount file(s) missing. Tap clips below to replace."
+            tvProjectStatus.text = getString(R.string.str_files_missing, missingCount)
             tvProjectStatus.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
             
             btnNext.isEnabled = false

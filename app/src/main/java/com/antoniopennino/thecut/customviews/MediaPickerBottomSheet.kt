@@ -89,7 +89,7 @@ class MediaPickerBottomSheet : BottomSheetDialogFragment() {
         } else {
             pbLoading.visibility = View.GONE
             layoutEmptyContainer.visibility = View.VISIBLE
-            tvEmptyState.text = "Permission denied. Grant access or browse folders."
+            tvEmptyState.setText(R.string.str_permission_denied_browse)
             btnGrantPermission.visibility = View.VISIBLE
         }
     }
@@ -281,7 +281,7 @@ class MediaPickerBottomSheet : BottomSheetDialogFragment() {
 
         if (displayedItems.isEmpty()) {
             layoutEmptyContainer.visibility = View.VISIBLE
-            tvEmptyState.text = "No media files found."
+            tvEmptyState.setText(R.string.str_no_media_files)
         } else {
             layoutEmptyContainer.visibility = View.GONE
         }

@@ -296,7 +296,7 @@ class MainActivity : AppCompatActivity() {
                     val tvDate = itemView.findViewById<TextView>(R.id.tvProjectDate)
 
                     tvTitle.text = project.title
-                    tvDate.text = "Modificato: ${project.formattedDate}"
+                    tvDate.text = getString(R.string.str_project_modified, project.formattedDate)
 
                     itemView.setOnClickListener {
                         val uri = Uri.fromFile(project.file)

@@ -206,4 +206,73 @@
     <string name="str_end_time">Fine</string>
     <string name="str_listen_cue">Ascolta</string>
     <string name="str_split_cue">Dividi</string>
+
+    <!-- Toast / feedback messages -->
+    <string name="str_toast_no_app_found">Nessuna app trovata per questa azione</string>
+    <string name="str_toast_no_app_image">Nessuna app trovata per la selezione immagini</string>
+    <string name="str_toast_capture_frame_failed">Cattura del frame non riuscita</string>
+    <string name="str_toast_pick_color_hint">Tocca un colore sull\'immagine per selezionarlo</string>
+    <string name="str_toast_subtitles_added">Sottotitoli aggiunti: %1$d battute</string>
+    <string name="str_toast_draw_something_first">Disegna prima qualcosa!</string>
+    <string name="str_toast_project_saved">Progetto salvato con successo</string>
+    <string name="str_toast_grant_notification">Concedi il permesso per le notifiche e riprova l\'esportazione.</string>
+    <string name="str_toast_no_project_uri">Nessun URI di progetto fornito</string>
+    <string name="str_toast_handwriting_added">Livello disegno aggiunto alla timeline</string>
+    <string name="str_toast_crash_log_copied">Log di crash copiato negli appunti!</string>
+    <string name="str_toast_frame_saved">Frame salvato nella galleria</string>
+    <string name="str_toast_beats_found">Trovati %1$d beat!</string>
+    <string name="str_toast_font_deleted">Font eliminato</string>
+    <string name="str_toast_font_imported">Font \'%1$s\' importato</string>
+    <string name="str_toast_save_project_failed">Salvataggio del progetto non riuscito</string>
+    <string name="str_toast_save_frame_failed">Salvataggio del frame non riuscito</string>
+    <string name="str_toast_render_drawing_failed">Rendering del disegno non riuscito</string>
+    <string name="str_toast_parse_project_failed">Lettura del progetto non riuscita</string>
+    <string name="str_toast_load_project_failed">Caricamento del progetto non riuscito</string>
+    <string name="str_toast_load_image_failed">Caricamento dell\'immagine non riuscito</string>
+    <string name="str_toast_font_import_failed">Importazione del font non riuscita. Deve essere un .ttf o .otf valido</string>
+    <string name="str_toast_font_delete_failed">Eliminazione del font non riuscita</string>
+    <string name="str_toast_export_started">Esportazione avviata in background…</string>
+    <string name="str_toast_handwriting_save_error">Errore nel salvataggio del disegno: %1$s</string>
+    <string name="str_toast_load_project_error">Errore nel caricamento del progetto</string>
+    <string name="str_toast_open_browser_failed">Impossibile aprire il browser. Log copiato negli appunti.</string>
+    <string name="str_toast_clips_added">%1$d clip aggiunte alla sequenza</string>
+    <string name="str_toast_subtitles_updated">Tutti i sottotitoli sono stati aggiornati!</string>
+    <string name="str_toast_replacements_done">Sostituzioni effettuate in tutte le battute!</string>
+    <string name="str_toast_silences_removed">Rimossi %1$d silenzi (-%2$ss)</string>
+    <string name="str_toast_no_video_for_silence">Nessun video valido per il taglio silenzi</string>
+    <string name="str_toast_no_video_loaded">Nessun video caricato</string>
+    <string name="str_toast_no_subtitles">Nessun sottotitolo presente</string>
+    <string name="str_toast_no_subtitles_edit">Nessun sottotitolo presente da modificare</string>
+    <string name="str_toast_no_subtitles_export">Nessun sottotitolo da esportare</string>
+    <string name="str_toast_no_speech_detected">Nessun segmento vocale rilevato</string>
+    <string name="str_toast_subtitles_generated">Generati %1$d sottotitoli sincronizzati!</string>
+    <string name="str_toast_export_error">Errore durante l\'esportazione: %1$s</string>
+    <string name="str_toast_color_selected">Colore selezionato!</string>
+    <string name="str_toast_cue_saved">Battuta salvata!</string>
+    <string name="str_toast_cue_deleted">Battuta eliminata</string>
+    <string name="str_toast_cue_split">Battuta divisa in due!</string>
+
+    <!-- Frasi UI sottotitoli / silenzi -->
+    <string name="str_analyzing_audio">Analisi audio e generazione sottotitoli in corso…</string>
+    <string name="str_auto_subtitles_title">Sottotitoli Automatici (%1$d battute)</string>
+    <string name="str_captions_count">%1$d battute</string>
+    <string name="str_cue_number">Battuta #%1$d</string>
+    <string name="str_export_srt_chooser">Esporta Sottotitoli SRT</string>
+    <string name="str_project_modified">Modificato: %1$s</string>
+    <string name="str_caption_placeholder">Battuta %1$d</string>
+    <string name="str_silence_scanning">Scansione silenzi audio in corso con FFmpeg…</string>
+    <string name="str_silence_none">Nessun silenzio significativo rilevato con questi parametri.\nProva a impostare la soglia a -30 dB o ridurre la durata minima a 0.25s.</string>
+    <string name="str_silence_preview">Trovati %1$d silenzi.\nRimosso totale: %2$ss (%3$d segmenti conservati)</string>
+    <string name="str_silence_result">Trovati %1$d silenzi!\nTempo totale rimosso: %2$ss\nSegmenti vocali conservati: %3$d</string>
+
+    <!-- Frasi UI varie -->
+    <string name="str_recording_tap_stop">Registrazione… Tocca per fermare</string>
+    <string name="str_recording_tap_start">Tocca per avviare la registrazione</string>
+    <string name="str_files_all_found">Tutti i file trovati. Pronto per l\'editing.</string>
+    <string name="str_files_missing">%1$d file mancanti. Tocca le clip qui sotto per sostituirli.</string>
+    <string name="str_unknown_duration">Durata sconosciuta</string>
+    <string name="str_unmute">Riattiva audio</string>
+    <string name="str_reset_all">Reimposta tutto</string>
+    <string name="str_no_media_files">Nessun file multimediale trovato.</string>
+    <string name="str_permission_denied_browse">Permesso negato. Concedi l\'accesso o sfoglia le cartelle.</string>
 </resources>
