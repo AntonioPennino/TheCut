@@ -112,6 +112,7 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private lateinit var timelineController: com.antoniopennino.thecut.delegates.TimelineController
+    private lateinit var silenceCutDelegate: com.antoniopennino.thecut.delegates.SilenceCutDelegate
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -835,6 +836,21 @@ class VideoEditingActivity : AppCompatActivity() {
                     reparentCanvasContainer(targetContainer)
                 }
                 override fun dpToPx(dp: Int): Int = dp.dpToPx()
+            }
+        )
+        silenceCutDelegate = com.antoniopennino.thecut.delegates.SilenceCutDelegate(
+            context = this,
+            lifecycleOwner = this,
+            viewModel = viewModel,
+            callbacks = object : com.antoniopennino.thecut.delegates.SilenceCutDelegate.Callbacks {
+                override fun getSelectedVideoIndex(): Int? = selectedVideoIndex
+                override fun getSequenceItems(): List<com.antoniopennino.thecut.models.EditOperation.MergeItem> = getSequenceItems()
+                override fun onSilencesApplied() {
+                    if (::player.isInitialized) {
+                        player.seekTo(0)
+                    }
+                    customVideoSeeker.invalidate()
+                }
             }
         )
         btnTimelineAdd = findViewById(R.id.btnTimelineAdd)
@@ -3417,124 +3433,7 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private fun showCutSilencesDialog() {
-        val targetIndex = selectedVideoIndex ?: 0
-        val sequenceItems = getSequenceItems()
-        if (targetIndex !in sequenceItems.indices) {
-            Toast.makeText(this, R.string.str_toast_no_video_for_silence, Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val targetClip = sequenceItems[targetIndex]
-        val clipStartMs = targetClip.trimStartMs
-        val clipEndMs = targetClip.trimEndMs
-        val clipDurationMs = targetClip.trimmedDurationMs
-
-        val bottomSheet = BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_cut_silences, null)
-        bottomSheet.setContentView(view)
-
-        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseCutSilences)
-        val sliderThreshold = view.findViewById<Slider>(R.id.sliderNoiseThreshold)
-        val tvThresholdVal = view.findViewById<TextView>(R.id.tvNoiseThresholdValue)
-        val sliderMinDuration = view.findViewById<Slider>(R.id.sliderMinSilenceDuration)
-        val tvMinDurationVal = view.findViewById<TextView>(R.id.tvMinSilenceValue)
-        val sliderPadding = view.findViewById<Slider>(R.id.sliderSafetyPadding)
-        val tvPaddingVal = view.findViewById<TextView>(R.id.tvSafetyPaddingValue)
-        val tvStatus = view.findViewById<TextView>(R.id.tvSilenceStatus)
-        val pbAnalyzing = view.findViewById<ProgressBar>(R.id.pbSilenceAnalyzing)
-        val btnAnalyze = view.findViewById<Button>(R.id.btnAnalyzeSilences)
-        val btnApply = view.findViewById<Button>(R.id.btnApplyCutSilences)
-
-        var detectedSilences: List<com.antoniopennino.thecut.utils.SilenceInterval> = emptyList()
-        var calculatedSpeechSegments: List<com.antoniopennino.thecut.utils.SpeechInterval> = emptyList()
-
-        sliderThreshold.addOnChangeListener { _, value, _ ->
-            tvThresholdVal.text = "${value.toInt()} dB"
-            btnApply.isEnabled = false
-        }
-        sliderMinDuration.addOnChangeListener { _, value, _ ->
-            tvMinDurationVal.text = String.format(Locale.US, "%.2f s", value)
-            btnApply.isEnabled = false
-        }
-        sliderPadding.addOnChangeListener { _, value, _ ->
-            tvPaddingVal.text = "${value.toInt()} ms"
-            if (detectedSilences.isNotEmpty()) {
-                calculatedSpeechSegments = SilenceDetector.calculateSpeechSegments(
-                    clipStartMs, clipEndMs, detectedSilences, value.toLong()
-                )
-                val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
-                tvStatus.text = getString(
-                    R.string.str_silence_preview,
-                    detectedSilences.size,
-                    String.format(Locale.US, "%.2f", totalRemovedMs / 1000.0),
-                    calculatedSpeechSegments.size
-                )
-                btnApply.isEnabled = detectedSilences.isNotEmpty()
-            }
-        }
-
-        btnClose.setOnClickListener { bottomSheet.dismiss() }
-
-        fun runAnalysis() {
-            pbAnalyzing.visibility = View.VISIBLE
-            btnAnalyze.isEnabled = false
-            btnApply.isEnabled = false
-            tvStatus.text = getString(R.string.str_silence_scanning)
-
-            val thresholdDb = sliderThreshold.value.toInt()
-            val minDurationSec = sliderMinDuration.value
-            val paddingMs = sliderPadding.value.toLong()
-
-            SilenceDetector.detectSilences(
-                context = this@VideoEditingActivity,
-                mediaUri = targetClip.uri,
-                totalDurationMs = targetClip.durationMs,
-                thresholdDb = thresholdDb,
-                minDurationSec = minDurationSec
-            ) { silences ->
-                runOnUiThread {
-                    pbAnalyzing.visibility = View.GONE
-                    btnAnalyze.isEnabled = true
-                    detectedSilences = silences.filter { it.startMs >= clipStartMs && it.endMs <= clipEndMs }
-                    calculatedSpeechSegments = SilenceDetector.calculateSpeechSegments(
-                        clipStartMs, clipEndMs, detectedSilences, paddingMs
-                    )
-
-                    if (detectedSilences.isEmpty()) {
-                        tvStatus.text = getString(R.string.str_silence_none)
-                        btnApply.isEnabled = false
-                    } else {
-                        val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
-                        val removedSec = totalRemovedMs / 1000.0
-                        tvStatus.text = getString(
-                            R.string.str_silence_result,
-                            detectedSilences.size,
-                            String.format(Locale.US, "%.2f", removedSec),
-                            calculatedSpeechSegments.size
-                        )
-                        btnApply.isEnabled = true
-                    }
-                }
-            }
-        }
-
-        btnAnalyze.setOnClickListener { runAnalysis() }
-
-        btnApply.setOnClickListener {
-            if (calculatedSpeechSegments.isNotEmpty()) {
-                viewModel.applySilenceCut(targetIndex, calculatedSpeechSegments, targetClip.uri, targetClip.durationMs)
-                bottomSheet.dismiss()
-                val totalRemovedMs = (clipDurationMs - calculatedSpeechSegments.sumOf { it.durationMs }).coerceAtLeast(0L)
-                val removedSec = totalRemovedMs / 1000.0
-                Toast.makeText(this@VideoEditingActivity, getString(R.string.str_toast_silences_removed, detectedSilences.size, String.format(Locale.US, "%.1f", removedSec)), Toast.LENGTH_LONG).show()
-                if (::player.isInitialized) {
-                    player.seekTo(0)
-                }
-                customVideoSeeker.invalidate()
-            }
-        }
-
-        bottomSheet.show()
+        silenceCutDelegate.showCutSilencesDialog()
     }
 
     private fun mediaOverlayAction() {
