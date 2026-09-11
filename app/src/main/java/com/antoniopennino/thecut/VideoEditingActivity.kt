@@ -113,6 +113,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
     private lateinit var timelineController: com.antoniopennino.thecut.delegates.TimelineController
     private lateinit var silenceCutDelegate: com.antoniopennino.thecut.delegates.SilenceCutDelegate
+    private lateinit var exportDelegate: com.antoniopennino.thecut.delegates.ExportDelegate
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -246,8 +247,6 @@ class VideoEditingActivity : AppCompatActivity() {
             }
         }
     }
-    private var activeDirectoryTitleView: TextView? = null
-    private var activeDirectoryPathView: TextView? = null
 
     // Drag-to-rearrange clips state
     private var isDraggingSegment = false
@@ -809,6 +808,41 @@ class VideoEditingActivity : AppCompatActivity() {
         exportScreen.findViewById<View>(R.id.btnCancelExport)?.setBounceClickListener {
             cancelExport()
         }
+        exportDelegate = com.antoniopennino.thecut.delegates.ExportDelegate(
+            context = this,
+            viewModel = viewModel,
+            exportScreen = exportScreen,
+            callbacks = object : com.antoniopennino.thecut.delegates.ExportDelegate.Callbacks {
+                override fun onCommitActiveEdits() {
+                    commitActiveEditsIfAny()
+                }
+                override fun isShowingPreview(): Boolean = isShowingPreview
+                override fun onDismissPreview() {
+                    dismissPreview()
+                }
+                override fun onPickDirectoryRequested() {
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                    try {
+                        startActivityForResult(intent, PICK_DIRECTORY_REQUEST)
+                    } catch (e: android.content.ActivityNotFoundException) {
+                        Toast.makeText(this@VideoEditingActivity, R.string.toast_failed_to_select_folder, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onSaveProjectRequested() {
+                    saveProjectLauncher.launch("project.lcprj")
+                }
+                override fun onCancelExportJob() {
+                    lifecycleScope.launch {
+                        try {
+                            ffmpegEngine.cancelAllSessions()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error cancelling FFmpeg sessions: ${e.message}")
+                        }
+                    }
+                    exportJob?.cancel()
+                }
+            }
+        )
         previewLoadingOverlay = findViewById(R.id.previewLoadingOverlay)
         lottieAnimationView = findViewById(R.id.lottieAnimation)
         textTrackContainer = findViewById(R.id.textTrackContainer)
@@ -2203,9 +2237,7 @@ class VideoEditingActivity : AppCompatActivity() {
             viewModel.uiState.collect { uiState ->
                 if (uiState.isExporting) {
                     loadingScreen.visibility = View.GONE
-                    val progress = uiState.exportProgress
-                    exportScreen.findViewById<TextView>(R.id.tvExportPercentage)?.text = "$progress%"
-                    exportScreen.findViewById<android.widget.ProgressBar>(R.id.exportProgressBar)?.progress = progress
+                    exportDelegate.updateExportProgress(uiState.exportProgress)
                 } else {
                     val emptyStateVisible = findViewById<View>(R.id.emptyProjectState)?.visibility == View.VISIBLE
                     if (isImportLoading || (!isVideoLoaded && !emptyStateVisible)) {
@@ -2215,7 +2247,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     }
                 }
 
-                exportScreen.visibility = if (uiState.isExporting) View.VISIBLE else View.GONE
+                exportDelegate.setExportScreenVisible(uiState.isExporting)
 
                 if (::btnUndo.isInitialized && ::btnRedo.isInitialized) {
                     val isProjectEmpty = findViewById<View>(R.id.emptyProjectState)?.visibility == View.VISIBLE
@@ -4877,18 +4909,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 try {
                     val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     contentResolver.takePersistableUriPermission(treeUri, takeFlags)
-
-                    val sharedPreferences = getSharedPreferences("thecut_prefs", Context.MODE_PRIVATE)
-                    val isAudioOnly = viewModel.exportAudioOnly.value
-                    val prefKey = if (isAudioOnly) "export_audio_directory_uri" else "export_directory_uri"
-                    sharedPreferences.edit().putString(prefKey, treeUri.toString()).apply()
-
-                    val activeTitle = activeDirectoryTitleView
-                    val activePath = activeDirectoryPathView
-                    if (activeTitle != null && activePath != null) {
-                        updateExportDirectoryUi(activeTitle, activePath)
-                    }
-                    Toast.makeText(this, R.string.toast_export_location_updated_succes, Toast.LENGTH_SHORT).show()
+                    exportDelegate.onDirectoryPicked(treeUri)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error saving export directory: ${e.message}", e)
                     Toast.makeText(this, R.string.toast_failed_to_select_folder, Toast.LENGTH_SHORT).show()
@@ -5083,101 +5104,7 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private fun showQualitySettingsDialog() {
-        commitActiveEditsIfAny()
-        if (isShowingPreview) dismissPreview()
-        val bottomSheetDialog = BottomSheetDialog(this)
-        val sheetView = layoutInflater.inflate(R.layout.export_quality_bottom_sheet_dialog, null)
-
-        val cgResolution = sheetView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.cgResolution)
-        val cgFps = sheetView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.cgFps)
-        val switchAudioOnly = sheetView.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchAudioOnly)
-        val btnClose = sheetView.findViewById<ImageButton>(R.id.btnCloseSheet)
-
-        // Initialize state
-        val currentRes = viewModel.exportResolution.value
-        val currentFps = viewModel.exportFps.value
-        val isAudioOnly = viewModel.exportAudioOnly.value
-
-        when (currentRes) {
-            360 -> cgResolution.check(R.id.chipRes360)
-            480 -> cgResolution.check(R.id.chipRes480)
-            720 -> cgResolution.check(R.id.chipRes720)
-            1080 -> cgResolution.check(R.id.chipRes1080)
-            1440 -> cgResolution.check(R.id.chipRes1440)
-            2160 -> cgResolution.check(R.id.chipRes2160)
-            else -> cgResolution.check(R.id.chipRes1080)
-        }
-
-        when (currentFps) {
-            24 -> cgFps.check(R.id.chipFps24)
-            25 -> cgFps.check(R.id.chipFps25)
-            30 -> cgFps.check(R.id.chipFps30)
-            50 -> cgFps.check(R.id.chipFps50)
-            60 -> cgFps.check(R.id.chipFps60)
-            else -> cgFps.check(R.id.chipFps30)
-        }
-
-        switchAudioOnly.isChecked = isAudioOnly
-
-        val layoutExportDirectory = sheetView.findViewById<LinearLayout>(R.id.layoutExportDirectory)
-        val tvExportDirectoryTitle = sheetView.findViewById<TextView>(R.id.tvExportDirectoryTitle)
-        val tvExportDirectoryPath = sheetView.findViewById<TextView>(R.id.tvExportDirectoryPath)
-
-        activeDirectoryTitleView = tvExportDirectoryTitle
-        activeDirectoryPathView = tvExportDirectoryPath
-        updateExportDirectoryUi(tvExportDirectoryTitle, tvExportDirectoryPath)
-
-        fun saveSettings() {
-            val res = when (cgResolution.checkedChipId) {
-                R.id.chipRes360 -> 360
-                R.id.chipRes480 -> 480
-                R.id.chipRes720 -> 720
-                R.id.chipRes1080 -> 1080
-                R.id.chipRes1440 -> 1440
-                R.id.chipRes2160 -> 2160
-                else -> 1080
-            }
-            val fps = when (cgFps.checkedChipId) {
-                R.id.chipFps24 -> 24
-                R.id.chipFps25 -> 25
-                R.id.chipFps30 -> 30
-                R.id.chipFps50 -> 50
-                R.id.chipFps60 -> 60
-                else -> 30
-            }
-            viewModel.setExportSettings(res, fps, switchAudioOnly.isChecked)
-            updateExportDirectoryUi(tvExportDirectoryTitle, tvExportDirectoryPath)
-        }
-
-        cgResolution.setOnCheckedStateChangeListener { _, _ -> saveSettings() }
-        cgFps.setOnCheckedStateChangeListener { _, _ -> saveSettings() }
-        switchAudioOnly.setOnCheckedChangeListener { _, _ -> saveSettings() }
-
-        btnClose.setBounceClickListener {
-            bottomSheetDialog.dismiss()
-        }
-
-        layoutExportDirectory.setBounceClickListener {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            try {
-                startActivityForResult(intent, PICK_DIRECTORY_REQUEST)
-            } catch (e: android.content.ActivityNotFoundException) {
-                Toast.makeText(this, R.string.toast_failed_to_select_folder, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        bottomSheetDialog.setOnDismissListener {
-            activeDirectoryTitleView = null
-            activeDirectoryPathView = null
-        }
-
-        sheetView.findViewById<View>(R.id.btnSaveProject)?.setBounceClickListener {
-            bottomSheetDialog.dismiss()
-            saveProjectLauncher.launch("project.lcprj")
-        }
-
-        bottomSheetDialog.setContentView(sheetView)
-        bottomSheetDialog.show()
+        exportDelegate.showQualitySettingsDialog()
     }
 
     private fun exportVideoFile(uri: Uri) {
@@ -5302,50 +5229,7 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private fun cancelExport() {
-        lifecycleScope.launch {
-            try {
-                ffmpegEngine.cancelAllSessions()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error cancelling FFmpeg sessions: ${e.message}")
-            }
-        }
-        exportJob?.cancel()
-        viewModel.exportError("Export cancelled")
-        Toast.makeText(this, R.string.toast_export_cancelled, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun updateExportDirectoryUi(titleView: TextView, pathView: TextView) {
-        val sharedPreferences = getSharedPreferences("thecut_prefs", Context.MODE_PRIVATE)
-        val isAudioOnly = viewModel.exportAudioOnly.value
-        val prefKey = if (isAudioOnly) "export_audio_directory_uri" else "export_directory_uri"
-        val customUriString = sharedPreferences.getString(prefKey, null)
-        
-        if (customUriString != null) {
-            val customUri = Uri.parse(customUriString)
-            val displayName = getDocumentFolderName(customUri) ?: "Custom Folder"
-            titleView.text = displayName
-            pathView.text = customUri.path ?: customUriString
-        } else {
-            titleView.text = "TheCut (Default)"
-            pathView.text = if (isAudioOnly) "Music/TheCut" else "Movies/TheCut"
-        }
-    }
-
-    private fun getDocumentFolderName(uri: Uri): String? {
-        return try {
-            val documentUri = android.provider.DocumentsContract.buildDocumentUriUsingTree(
-                uri,
-                android.provider.DocumentsContract.getTreeDocumentId(uri)
-            )
-            contentResolver.query(documentUri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val index = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                    if (index >= 0) cursor.getString(index) else null
-                } else null
-            }
-        } catch (e: Exception) {
-            null
-        }
+        exportDelegate.cancelExport()
     }
 
     private fun setupExoPlayer() {
