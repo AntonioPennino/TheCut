@@ -100,30 +100,11 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var btnMoveLayerDown: ImageButton
 
     private lateinit var canvasContainer: FrameLayout
-    private lateinit var btnFullscreen: ImageButton
     private lateinit var btnExpandTimeline: ImageButton
     private lateinit var pipPlayerContainer: FrameLayout
-    private lateinit var fullscreenOverlay: FrameLayout
-    private lateinit var fullscreenCanvasHolder: FrameLayout
-    private lateinit var fullscreenControls: android.widget.RelativeLayout
-    private lateinit var btnFullscreenPlayPause: ImageButton
-    private lateinit var btnExitFullscreen: ImageButton
-    private lateinit var btnExitFullscreenTop: ImageButton
-    private lateinit var sbFullscreenSeeker: SeekBar
-    private lateinit var tvFullscreenCurrentTime: TextView
-    private lateinit var tvFullscreenTotalTime: TextView
+    private lateinit var fullscreenController: com.antoniopennino.thecut.delegates.FullscreenController
 
-    private var isFullscreenMode = false
     private var isTimelineExpanded = false
-    private var isUserScrubbingFullscreenSeeker = false
-    private val fullscreenHideHandler = android.os.Handler(android.os.Looper.getMainLooper())
-    private val hideFullscreenControlsRunnable = Runnable {
-        if (::fullscreenControls.isInitialized && isFullscreenMode) {
-            fullscreenControls.animate().alpha(0f).setDuration(300).withEndAction {
-                fullscreenControls.visibility = View.GONE
-            }.start()
-        }
-    }
 
     private lateinit var timelineHorizontalScroll: android.widget.HorizontalScrollView
     private lateinit var timelineVerticalScroll: android.widget.ScrollView
@@ -572,8 +553,8 @@ class VideoEditingActivity : AppCompatActivity() {
         // Register back-press callback to prompt for quit confirmation
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (isFullscreenMode) {
-                    exitFullscreenMode()
+                if (::fullscreenController.isInitialized && fullscreenController.isFullscreen) {
+                    fullscreenController.exitFullscreenMode()
                 } else if (isHandwritingActive) {
                     val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView)
                     if (canvasView != null && !canvasView.isEmpty()) {
@@ -716,14 +697,11 @@ class VideoEditingActivity : AppCompatActivity() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
                     btnPlayPause.setImageResource(R.drawable.ic_pause_24)
-                    if (::btnFullscreenPlayPause.isInitialized) {
-                        btnFullscreenPlayPause.setImageResource(R.drawable.ic_pause_24)
-                    }
                 } else {
                     btnPlayPause.setImageResource(R.drawable.ic_play_24)
-                    if (::btnFullscreenPlayPause.isInitialized) {
-                        btnFullscreenPlayPause.setImageResource(R.drawable.ic_play_24)
-                    }
+                }
+                if (::fullscreenController.isInitialized) {
+                    fullscreenController.updatePlayPauseIcon(isPlaying)
                 }
             }
         })
@@ -746,27 +724,53 @@ class VideoEditingActivity : AppCompatActivity() {
         transitionPreviewOverlayView = findViewById(R.id.transitionPreviewOverlayView)
         canvasContainer = findViewById(R.id.canvasContainer)
 
-        btnFullscreen = findViewById(R.id.btnFullscreen)
         btnExpandTimeline = findViewById(R.id.btnExpandTimeline)
         pipPlayerContainer = findViewById(R.id.pipPlayerContainer)
-        fullscreenOverlay = findViewById(R.id.fullscreenOverlay)
-        fullscreenCanvasHolder = findViewById(R.id.fullscreenCanvasHolder)
-        fullscreenControls = findViewById(R.id.fullscreenControls)
-        btnFullscreenPlayPause = findViewById(R.id.btnFullscreenPlayPause)
-        btnExitFullscreen = findViewById(R.id.btnExitFullscreen)
-        btnExitFullscreenTop = findViewById(R.id.btnExitFullscreenTop)
-        sbFullscreenSeeker = findViewById(R.id.sbFullscreenSeeker)
-        tvFullscreenCurrentTime = findViewById(R.id.tvFullscreenCurrentTime)
-        tvFullscreenTotalTime = findViewById(R.id.tvFullscreenTotalTime)
 
-        setupFullscreenAndPipControls()
+        fullscreenController = com.antoniopennino.thecut.delegates.FullscreenController(
+            rootView = window.decorView,
+            callbacks = object : com.antoniopennino.thecut.delegates.FullscreenController.Callbacks {
+                override fun isVideoReady(): Boolean = ::player.isInitialized && isVideoLoaded
+                override fun onPlayPauseToggle() {
+                    if (player.isPlaying) {
+                        player.pause()
+                    } else {
+                        val totalDuration = getTotalSequenceDuration()
+                        val currentGlobalPos = getGlobalPosition()
+                        if (currentGlobalPos >= totalDuration - 100L || player.playbackState == Player.STATE_ENDED) {
+                            seekToGlobalPosition(0L)
+                            timelineHorizontalScroll.scrollTo(0, 0)
+                            updateDurationDisplay(0, totalDuration.toInt())
+                        }
+                        player.play()
+                    }
+                }
+                override fun getTotalDuration(): Long = getTotalSequenceDuration()
+                override fun onSeekFromFullscreen(targetMs: Long) {
+                    seekToGlobalPosition(targetMs)
+                    isProgrammaticScroll = true
+                    timelineHorizontalScroll.scrollTo((targetMs * pixelsPerMs).toInt(), 0)
+                    isProgrammaticScroll = false
+                    val totalMs = getTotalSequenceDuration()
+                    tvDuration.text = "${formatDuration(targetMs.toInt())} / ${formatDuration(totalMs.toInt())}"
+                }
+                override fun onReparentCanvas(targetContainer: ViewGroup) {
+                    reparentCanvasContainer(targetContainer)
+                }
+                override fun formatDuration(durationMs: Int): String {
+                    return this@VideoEditingActivity.formatDuration(durationMs)
+                }
+            }
+        )
+
+        setupPipAndExpandControls()
 
         val canvasLayoutListener = android.view.ViewTreeObserver.OnGlobalLayoutListener {
             triggerCanvasLayoutUpdate()
         }
         playerContainer.viewTreeObserver.addOnGlobalLayoutListener(canvasLayoutListener)
         pipPlayerContainer.viewTreeObserver.addOnGlobalLayoutListener(canvasLayoutListener)
-        fullscreenCanvasHolder.viewTreeObserver.addOnGlobalLayoutListener(canvasLayoutListener)
+        fullscreenController.fullscreenCanvasHolder.viewTreeObserver.addOnGlobalLayoutListener(canvasLayoutListener)
 
         tvDuration = findViewById(R.id.tvDuration)
         sequenceTrackContainer = findViewById(R.id.sequenceTrackContainer)
@@ -7823,87 +7827,13 @@ class VideoEditingActivity : AppCompatActivity() {
     private fun updateDurationDisplay(current: Int, total: Int) {
         if (total <= 0) return
         tvDuration.text = "${formatDuration(current)} / ${formatDuration(total)}"
-        if (::tvFullscreenCurrentTime.isInitialized) {
-            tvFullscreenCurrentTime.text = formatDuration(current)
-        }
-        if (::tvFullscreenTotalTime.isInitialized) {
-            tvFullscreenTotalTime.text = formatDuration(total)
-        }
-        if (::sbFullscreenSeeker.isInitialized && !isUserScrubbingFullscreenSeeker) {
-            val progress = ((current.toFloat() / total.toFloat()) * 1000).toInt().coerceIn(0, 1000)
-            sbFullscreenSeeker.progress = progress
+        if (::fullscreenController.isInitialized) {
+            fullscreenController.updateDuration(current, total)
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setupFullscreenAndPipControls() {
-        btnFullscreen.setBounceClickListener {
-            enterFullscreenMode()
-        }
-
-        btnExitFullscreen.setBounceClickListener {
-            exitFullscreenMode()
-        }
-        btnExitFullscreenTop.setBounceClickListener {
-            exitFullscreenMode()
-        }
-
-        btnFullscreenPlayPause.setBounceClickListener {
-            if (::player.isInitialized && isVideoLoaded) {
-                if (player.isPlaying) {
-                    player.pause()
-                } else {
-                    val totalDuration = getTotalSequenceDuration()
-                    val currentGlobalPos = getGlobalPosition()
-                    if (currentGlobalPos >= totalDuration - 100L || player.playbackState == Player.STATE_ENDED) {
-                        seekToGlobalPosition(0L)
-                        timelineHorizontalScroll.scrollTo(0, 0)
-                        updateDurationDisplay(0, totalDuration.toInt())
-                    }
-                    player.play()
-                }
-            }
-            showFullscreenControlsTemporarily()
-        }
-
-        fullscreenOverlay.setOnClickListener {
-            if (fullscreenControls.visibility == View.VISIBLE && fullscreenControls.alpha > 0.5f) {
-                fullscreenHideHandler.removeCallbacks(hideFullscreenControlsRunnable)
-                fullscreenControls.animate().alpha(0f).setDuration(250).withEndAction {
-                    fullscreenControls.visibility = View.GONE
-                }.start()
-            } else {
-                showFullscreenControlsTemporarily()
-            }
-        }
-
-        sbFullscreenSeeker.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    val totalMs = getTotalSequenceDuration()
-                    if (totalMs > 0) {
-                        val targetMs = ((progress.toFloat() / 1000f) * totalMs).toLong()
-                        seekToGlobalPosition(targetMs)
-                        isProgrammaticScroll = true
-                        timelineHorizontalScroll.scrollTo((targetMs * pixelsPerMs).toInt(), 0)
-                        isProgrammaticScroll = false
-                        tvFullscreenCurrentTime.text = formatDuration(targetMs.toInt())
-                        tvDuration.text = "${formatDuration(targetMs.toInt())} / ${formatDuration(totalMs.toInt())}"
-                    }
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                isUserScrubbingFullscreenSeeker = true
-                fullscreenHideHandler.removeCallbacks(hideFullscreenControlsRunnable)
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                isUserScrubbingFullscreenSeeker = false
-                showFullscreenControlsTemporarily()
-            }
-        })
-
+    private fun setupPipAndExpandControls() {
         btnExpandTimeline.setBounceClickListener {
             toggleTimelineExpandedMode()
         }
@@ -7960,30 +7890,6 @@ class VideoEditingActivity : AppCompatActivity() {
         } else {
             resetCropPreview()
         }
-    }
-
-    private fun showFullscreenControlsTemporarily() {
-        fullscreenHideHandler.removeCallbacks(hideFullscreenControlsRunnable)
-        fullscreenControls.visibility = View.VISIBLE
-        fullscreenControls.animate().cancel()
-        fullscreenControls.alpha = 1f
-        fullscreenHideHandler.postDelayed(hideFullscreenControlsRunnable, 3500)
-    }
-
-    private fun enterFullscreenMode() {
-        isFullscreenMode = true
-        fullscreenOverlay.visibility = View.VISIBLE
-        fullscreenControls.visibility = View.VISIBLE
-        fullscreenControls.alpha = 1f
-        reparentCanvasContainer(fullscreenCanvasHolder)
-        showFullscreenControlsTemporarily()
-    }
-
-    private fun exitFullscreenMode() {
-        isFullscreenMode = false
-        fullscreenHideHandler.removeCallbacks(hideFullscreenControlsRunnable)
-        fullscreenOverlay.visibility = View.GONE
-        reparentCanvasContainer(playerContainer)
     }
 
     private var isLandscapeMode: Boolean = false
@@ -8506,6 +8412,9 @@ class VideoEditingActivity : AppCompatActivity() {
         draggableTextOverlay?.deactivate()
         draggableImageOverlay?.deactivate()
         previewFile?.delete()
+        if (::fullscreenController.isInitialized) {
+            fullscreenController.destroy()
+        }
         super.onDestroy()
         if (::player.isInitialized) {
             player.release()
