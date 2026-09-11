@@ -111,7 +111,9 @@ class VideoEditingActivity : AppCompatActivity() {
         )
     }
 
-    private var isTimelineExpanded = false
+    private lateinit var timelineController: com.antoniopennino.thecut.delegates.TimelineController
+    private val isTimelineExpanded: Boolean
+        get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
     private lateinit var timelineHorizontalScroll: android.widget.HorizontalScrollView
     private lateinit var timelineVerticalScroll: android.widget.ScrollView
@@ -119,12 +121,25 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var timelineContainer: FrameLayout
     private var isUserScrollingTimeline = false
     private var isTrackDragging = false
-    private var isProgrammaticScroll = false
-    private var pixelsPerMs: Float = 0.3f
+    private var _isProgrammaticScrollFallback = false
+    private var isProgrammaticScroll: Boolean
+        get() = if (::timelineController.isInitialized) timelineController.isProgrammaticScroll else _isProgrammaticScrollFallback
+        set(value) {
+            _isProgrammaticScrollFallback = value
+            if (::timelineController.isInitialized) timelineController.isProgrammaticScroll = value
+        }
+    private var _pixelsPerMsFallback: Float = 0.3f
+    private var pixelsPerMs: Float
+        get() = if (::timelineController.isInitialized) timelineController.pixelsPerMs else _pixelsPerMsFallback
+        set(value) {
+            _pixelsPerMsFallback = value
+            if (::timelineController.isInitialized) timelineController.pixelsPerMs = value
+        }
     private var lastSnappedTargetMs: Long = -1L
     private enum class ZoomMode { FIT, MEDIUM, PRECISION }
     private var currentZoomMode = ZoomMode.MEDIUM
-    private lateinit var scaleDetector: android.view.ScaleGestureDetector
+    private val scaleDetector: android.view.ScaleGestureDetector
+        get() = timelineController.scaleDetector
 
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
@@ -676,28 +691,6 @@ class VideoEditingActivity : AppCompatActivity() {
             }
         }
 
-        scaleDetector = android.view.ScaleGestureDetector(this, object : android.view.ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: android.view.ScaleGestureDetector): Boolean {
-                val scaleFactor = detector.scaleFactor
-                val density = resources.displayMetrics.density
-                val totalDuration = getTotalSequenceDuration()
-                if (totalDuration <= 0L) return true
-
-                val minPixelsPerMs = maxOf(0.001f * density, (timelineHorizontalScroll.width.toFloat() - 32.dpToPx()) / totalDuration)
-                val maxPixelsPerMs = 1.5f * density
-
-                val newPixelsPerMs = pixelsPerMs * scaleFactor
-                pixelsPerMs = newPixelsPerMs.coerceIn(minPixelsPerMs, maxPixelsPerMs)
-
-                viewModel.project.value?.let { renderTracks(it) }
-
-                val currentPos = getGlobalPosition()
-                isProgrammaticScroll = true
-                timelineHorizontalScroll.scrollTo((currentPos * pixelsPerMs).toInt(), 0)
-                isProgrammaticScroll = false
-                return true
-            }
-        })
 
         // Update play/pause button icon on playback state change
         player.addListener(object : Player.Listener {
@@ -825,6 +818,25 @@ class VideoEditingActivity : AppCompatActivity() {
         timelineHorizontalScroll = findViewById(R.id.timelineHorizontalScroll)
         timelineContainer = findViewById(R.id.timelineContainer)
         timelineVerticalScroll = findViewById(R.id.timelineVerticalScroll)
+        timelineController = com.antoniopennino.thecut.delegates.TimelineController(
+            context = this,
+            rootView = window.decorView,
+            callbacks = object : com.antoniopennino.thecut.delegates.TimelineController.Callbacks {
+                override fun getTotalDuration(): Long = getTotalSequenceDuration()
+                override fun getCurrentPosition(): Long = getGlobalPosition()
+                override fun onRenderTracks() {
+                    viewModel.project.value?.let { renderTracks(it) }
+                }
+                override fun onCanvasLayoutUpdateNeeded() {
+                    triggerCanvasLayoutUpdate()
+                    customVideoSeeker.invalidate()
+                }
+                override fun reparentCanvas(targetContainer: ViewGroup) {
+                    reparentCanvasContainer(targetContainer)
+                }
+                override fun dpToPx(dp: Int): Int = dp.dpToPx()
+            }
+        )
         btnTimelineAdd = findViewById(R.id.btnTimelineAdd)
         
         emptyProjectState = findViewById(R.id.emptyProjectState)
@@ -7786,77 +7798,7 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private fun toggleTimelineExpandedMode() {
-        isTimelineExpanded = !isTimelineExpanded
-        val density = resources.displayMetrics.density
-
-        if (isLandscapeMode) {
-            val landscapeToolbarsHolder = findViewById<FrameLayout>(R.id.landscapeToolbarsHolder)
-            if (isTimelineExpanded) {
-                btnExpandTimeline.setImageResource(R.drawable.ic_collapse_24)
-                landscapeToolbarsHolder?.visibility = View.GONE
-            } else {
-                btnExpandTimeline.setImageResource(R.drawable.ic_expand_24)
-                landscapeToolbarsHolder?.visibility = View.VISIBLE
-            }
-            playerContainer.post {
-                triggerCanvasLayoutUpdate()
-                customVideoSeeker.invalidate()
-            }
-            return
-        }
-
-        val seekerContainer = findViewById<LinearLayout>(R.id.seekerContainer)
-
-        if (isTimelineExpanded) {
-            btnExpandTimeline.setImageResource(R.drawable.ic_collapse_24)
-            pipPlayerContainer.visibility = View.GONE
-            playerContainer.visibility = View.VISIBLE
-            reparentCanvasContainer(playerContainer)
-
-            // 1. Make Top Video Monitor Compact (DaVinci / FCP Style, full width, 145dp height)
-            val lpPlayer = playerContainer.layoutParams as LinearLayout.LayoutParams
-            lpPlayer.height = (145 * density).toInt()
-            lpPlayer.weight = 0f
-            playerContainer.layoutParams = lpPlayer
-
-            // 2. Expand Seeker & Timeline to fill all remaining vertical space
-            val lpSeeker = seekerContainer.layoutParams as LinearLayout.LayoutParams
-            lpSeeker.height = 0
-            lpSeeker.weight = 1.0f
-            seekerContainer.layoutParams = lpSeeker
-
-            val lpTimeline = timelineContainer.layoutParams as LinearLayout.LayoutParams
-            lpTimeline.height = 0
-            lpTimeline.weight = 1.0f
-            timelineContainer.layoutParams = lpTimeline
-        } else {
-            btnExpandTimeline.setImageResource(R.drawable.ic_expand_24)
-            pipPlayerContainer.visibility = View.GONE
-            playerContainer.visibility = View.VISIBLE
-            reparentCanvasContainer(playerContainer)
-
-            // 1. Restore Full Height Video Monitor
-            val lpPlayer = playerContainer.layoutParams as LinearLayout.LayoutParams
-            lpPlayer.height = 0
-            lpPlayer.weight = 1.0f
-            playerContainer.layoutParams = lpPlayer
-
-            // 2. Restore Standard Height Timeline (140dp)
-            val lpSeeker = seekerContainer.layoutParams as LinearLayout.LayoutParams
-            lpSeeker.height = LinearLayout.LayoutParams.WRAP_CONTENT
-            lpSeeker.weight = 0f
-            seekerContainer.layoutParams = lpSeeker
-
-            val lpTimeline = timelineContainer.layoutParams as LinearLayout.LayoutParams
-            lpTimeline.height = (140 * density).toInt()
-            lpTimeline.weight = 0f
-            timelineContainer.layoutParams = lpTimeline
-        }
-
-        playerContainer.post {
-            triggerCanvasLayoutUpdate()
-            customVideoSeeker.invalidate()
-        }
+        timelineController.toggleTimelineExpandedMode(isLandscapeMode)
     }
 
     private fun formatDuration(milliseconds: Int): String {
