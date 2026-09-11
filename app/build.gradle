@@ -12,6 +12,7 @@ aboutLibraries {
 android {
     namespace 'com.antoniopennino.thecut'
     compileSdk 34
+    ndkVersion "26.1.10909125"
 
     androidResources {
         generateLocaleConfig = true
@@ -31,6 +32,19 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
         }
     }
 
