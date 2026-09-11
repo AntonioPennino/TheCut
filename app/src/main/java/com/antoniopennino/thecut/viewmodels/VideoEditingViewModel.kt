@@ -11,8 +11,11 @@ import com.antoniopennino.thecut.models.TextPosition
 import com.antoniopennino.thecut.models.VideoEditingUiState
 import com.antoniopennino.thecut.models.VideoProject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -64,8 +67,18 @@ class VideoEditingViewModel : ViewModel() {
         _exportAudioOnly.value = audioOnly
     }
 
-    val operations: StateFlow<List<EditOperation>>
-        get() = MutableStateFlow(project.value?.operations ?: emptyList()).asStateFlow()
+    /**
+     * Reactive, always-current list of the project's pending operations.
+     * Derived from [project] so collectors receive every update, unlike the
+     * previous implementation which minted a fresh (never-updating) flow per access.
+     */
+    val operations: StateFlow<List<EditOperation>> = _project
+        .map { it?.operations ?: emptyList() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
+        )
 
     fun initializeProject(sourceUri: Uri, sourceName: String) {
         _project.value = VideoProject(sourceUri = sourceUri, sourceName = sourceName)
