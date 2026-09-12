@@ -115,6 +115,7 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var timelineController: com.antoniopennino.thecut.delegates.TimelineController
     private lateinit var silenceCutDelegate: com.antoniopennino.thecut.delegates.SilenceCutDelegate
     private lateinit var exportDelegate: com.antoniopennino.thecut.delegates.ExportDelegate
+    private lateinit var handwritingDelegate: com.antoniopennino.thecut.delegates.HandwritingDelegate
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -578,17 +579,17 @@ class VideoEditingActivity : AppCompatActivity() {
             override fun handleOnBackPressed() {
                 if (::fullscreenController.isInitialized && fullscreenController.isFullscreen) {
                     fullscreenController.exitFullscreenMode()
-                } else if (isHandwritingActive) {
+                } else if (::handwritingDelegate.isInitialized && handwritingDelegate.isActive) {
                     val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView)
                     if (canvasView != null && !canvasView.isEmpty()) {
                         MaterialAlertDialogBuilder(this@VideoEditingActivity)
                             .setTitle("Discard Handwriting?")
                             .setMessage("Are you sure you want to discard your drawing?")
-                            .setPositiveButton("Discard") { _, _ -> closeHandwritingMode() }
+                            .setPositiveButton("Discard") { _, _ -> handwritingDelegate.close() }
                             .setNegativeButton("Keep Editing", null)
                             .show()
                     } else {
-                        closeHandwritingMode()
+                        handwritingDelegate.close()
                     }
                 } else {
                     showQuitConfirmationDialog()
@@ -611,7 +612,41 @@ class VideoEditingActivity : AppCompatActivity() {
         applyOrientationLayout(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
         setupExoPlayer()
         setupCustomSeeker()
-        setupHandwritingControls()
+        handwritingDelegate = com.antoniopennino.thecut.delegates.HandwritingDelegate(
+            activity = this,
+            callbacks = object : com.antoniopennino.thecut.delegates.HandwritingDelegate.Callbacks {
+                override fun onRequestCloseOtherModes() = closeActiveEditingModes()
+                override fun setActiveToolButton(viewId: Int) = this@VideoEditingActivity.setActiveToolButton(viewId)
+                override fun showCustomColorPicker(currentHex: String, onPicked: (String) -> Unit) =
+                    this@VideoEditingActivity.showCustomColorPicker(currentHex, onPicked)
+                override fun pausePlayback() {
+                    if (::player.isInitialized && player.isPlaying) {
+                        player.pause()
+                        btnPlayPause.setImageResource(R.drawable.ic_play_24)
+                    }
+                }
+                override fun getVideoRect(): android.graphics.RectF = this@VideoEditingActivity.getVideoRect()
+                override fun getPrimaryAspectRatio(): Float = primaryVideoAspectRatio
+                override fun onDrawingCommitted(file: File) {
+                    val startTimeMs = getGlobalPosition()
+                    val sequenceDuration = getTotalSequenceDuration().coerceAtLeast(3000L)
+                    val endTimeMs = (startTimeMs + 4000L).coerceAtMost(sequenceDuration)
+                    val overlayOp = com.antoniopennino.thecut.models.EditOperation.AddImageOverlay(
+                        imageUri = Uri.fromFile(file),
+                        relativeX = 0.5f,
+                        relativeY = 0.5f,
+                        relativeWidth = 1.0f,
+                        relativeHeight = 1.0f,
+                        rotationAngle = 0f,
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs
+                    )
+                    viewModel.addOperation(overlayOp)
+                    viewModel.project.value?.let { renderTracks(it) }
+                }
+            }
+        )
+        handwritingDelegate.setupControls()
         observeViewModelState()
 
         // Play/Pause button logic
@@ -2776,143 +2811,6 @@ class VideoEditingActivity : AppCompatActivity() {
         setActiveToolButton(-1)
     }
 
-    private var isHandwritingActive = false
-
-    private fun setupHandwritingControls() {
-        val btnDraw = findViewById<ImageButton>(R.id.btnDraw)
-        btnDraw?.setBounceClickListener {
-            setActiveToolButton(R.id.btnDraw)
-            openHandwritingMode()
-        }
-
-        val handwritingPanel = findViewById<View>(R.id.handwritingPanel) ?: return
-        val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView) ?: return
-        val dotView = handwritingPanel.findViewById<BrushSizeDotView>(R.id.brushSizeDotView)
-        val sliderBrushSize = handwritingPanel.findViewById<com.google.android.material.slider.Slider>(R.id.sliderBrushSize)
-        val btnClose = handwritingPanel.findViewById<ImageButton>(R.id.btnCloseHandwriting)
-        val btnUndo = handwritingPanel.findViewById<ImageButton>(R.id.btnUndoHandwriting)
-        val btnRedo = handwritingPanel.findViewById<ImageButton>(R.id.btnRedoHandwriting)
-        val btnClear = handwritingPanel.findViewById<ImageButton>(R.id.btnClearHandwriting)
-        val btnDone = handwritingPanel.findViewById<ImageButton>(R.id.btnDoneHandwriting)
-        val btnCustomColor = handwritingPanel.findViewById<View>(R.id.btnCustomColor)
-        val layoutPalette = handwritingPanel.findViewById<LinearLayout>(R.id.layoutColorPalette)
-
-        val presetHexes = listOf(
-            "#FFFFFF", "#000000", "#FF007A", "#FF3B30",
-            "#FF9500", "#FFCC00", "#34C759", "#32ADE6",
-            "#007AFF", "#AF52DE"
-        )
-
-        var selectedHex = "#FF007A"
-
-        fun updateColorSelection(hex: String) {
-            selectedHex = hex
-            val colorInt = try { Color.parseColor(hex) } catch (e: Exception) { Color.RED }
-            canvasView.setBrushColor(colorInt)
-            dotView?.setBrushColor(colorInt)
-
-            if (layoutPalette != null) {
-                for (i in 1 until layoutPalette.childCount) {
-                    val child = layoutPalette.getChildAt(i) as? FrameLayout ?: continue
-                    val tagHex = child.tag as? String
-                    if (tagHex != null && tagHex.equals(hex, ignoreCase = true)) {
-                        child.setBackgroundResource(R.drawable.bg_aspect_ratio_selected)
-                        child.foreground = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_transition_border_selected)
-                    } else {
-                        child.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
-                        child.foreground = null
-                    }
-                }
-            }
-        }
-
-        if (layoutPalette != null && layoutPalette.childCount <= 1) {
-            val density = resources.displayMetrics.density
-            val swatchSize = (36 * density).toInt()
-            val innerSize = (24 * density).toInt()
-            val margin = (4 * density).toInt()
-
-            for (hex in presetHexes) {
-                val frame = FrameLayout(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(swatchSize, swatchSize).apply {
-                        setMargins(margin, 0, margin, 0)
-                    }
-                    tag = hex
-                    setBackgroundResource(R.drawable.bg_aspect_ratio_item)
-                    isClickable = true
-                    isFocusable = true
-                }
-
-                val circleView = View(this).apply {
-                    layoutParams = FrameLayout.LayoutParams(innerSize, innerSize, Gravity.CENTER)
-                    val drawable = android.graphics.drawable.GradientDrawable().apply {
-                        shape = android.graphics.drawable.GradientDrawable.OVAL
-                        setColor(try { Color.parseColor(hex) } catch (e: Exception) { Color.WHITE })
-                        setStroke((1 * density).toInt(), Color.parseColor("#44FFFFFF"))
-                    }
-                    background = drawable
-                }
-                frame.addView(circleView)
-
-                frame.setOnClickListener {
-                    updateColorSelection(hex)
-                }
-                layoutPalette.addView(frame)
-            }
-        }
-
-        val density = resources.displayMetrics.density
-        val minPx = 3f * density
-        val maxPx = 60f * density
-
-        sliderBrushSize?.addOnChangeListener { _, value, _ ->
-            val fraction = value / 100f
-            val sizePx = minPx + fraction * (maxPx - minPx)
-            canvasView.setBrushSizePx(sizePx)
-            dotView?.setBrushSize(sizePx, minPx, maxPx)
-        }
-
-        val initialValue = sliderBrushSize?.value ?: 25f
-        val initialSizePx = minPx + (initialValue / 100f) * (maxPx - minPx)
-        canvasView.setBrushSizePx(initialSizePx)
-        dotView?.setBrushSize(initialSizePx, minPx, maxPx)
-        updateColorSelection(selectedHex)
-
-        canvasView.onStrokesChangedListener = {
-            btnUndo?.isEnabled = canvasView.canUndo()
-            btnUndo?.alpha = if (canvasView.canUndo()) 1.0f else 0.5f
-            btnRedo?.isEnabled = canvasView.canRedo()
-            btnRedo?.alpha = if (canvasView.canRedo()) 1.0f else 0.5f
-        }
-
-        btnUndo?.setBounceClickListener { canvasView.undo() }
-        btnRedo?.setBounceClickListener { canvasView.redo() }
-        btnClear?.setBounceClickListener { canvasView.clear() }
-
-        btnClose?.setBounceClickListener {
-            if (!canvasView.isEmpty()) {
-                MaterialAlertDialogBuilder(this)
-                    .setTitle("Discard Handwriting?")
-                    .setMessage("Are you sure you want to discard your drawing?")
-                    .setPositiveButton("Discard") { _, _ -> closeHandwritingMode() }
-                    .setNegativeButton("Keep Editing", null)
-                    .show()
-            } else {
-                closeHandwritingMode()
-            }
-        }
-
-        btnDone?.setBounceClickListener {
-            saveAndCommitHandwriting()
-        }
-
-        btnCustomColor?.setBounceClickListener {
-            showCustomColorPicker(selectedHex) { customHex ->
-                updateColorSelection(customHex)
-            }
-        }
-    }
-
     private fun getVideoRect(): android.graphics.RectF {
         val activeParent = (canvasContainer.parent as? View) ?: playerContainer
         val containerWidth = activeParent.width.toFloat()
@@ -2937,95 +2835,6 @@ class VideoEditingActivity : AppCompatActivity() {
         return android.graphics.RectF(left, top, left + finalW, top + finalH)
     }
 
-    private fun openHandwritingMode() {
-        closeActiveEditingModes()
-        isHandwritingActive = true
-        if (::player.isInitialized && player.isPlaying) {
-            player.pause()
-            btnPlayPause.setImageResource(R.drawable.ic_play_24)
-        }
-
-        val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView)
-        val handwritingPanel = findViewById<View>(R.id.handwritingPanel)
-
-        val vRect = getVideoRect()
-        canvasView?.setVideoRect(vRect)
-        canvasView?.clear()
-        canvasView?.visibility = View.VISIBLE
-        handwritingPanel?.visibility = View.VISIBLE
-
-        findViewById<android.widget.HorizontalScrollView>(R.id.editingControlsScroll)?.visibility = View.GONE
-    }
-
-    private fun closeHandwritingMode() {
-        isHandwritingActive = false
-        val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView)
-        val handwritingPanel = findViewById<View>(R.id.handwritingPanel)
-
-        canvasView?.visibility = View.GONE
-        handwritingPanel?.visibility = View.GONE
-        findViewById<android.widget.HorizontalScrollView>(R.id.editingControlsScroll)?.visibility = View.VISIBLE
-        setActiveToolButton(-1)
-    }
-
-    private fun saveAndCommitHandwriting() {
-        val canvasView = findViewById<HandwritingCanvasView>(R.id.handwritingCanvasView) ?: return
-        if (canvasView.isEmpty()) {
-            Toast.makeText(this, R.string.str_toast_draw_something_first, Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val baseRatio = if (primaryVideoAspectRatio > 0f) primaryVideoAspectRatio else 16f / 9f
-        val targetWidth: Int
-        val targetHeight: Int
-        if (baseRatio >= 1.0f) {
-            targetWidth = 1920
-            targetHeight = (1920f / baseRatio).toInt().coerceAtLeast(1)
-        } else {
-            targetHeight = 1920
-            targetWidth = (1920f * baseRatio).toInt().coerceAtLeast(1)
-        }
-
-        val bitmap = canvasView.exportToBitmap(targetWidth, targetHeight)
-        if (bitmap == null) {
-            Toast.makeText(this, R.string.str_toast_render_drawing_failed, Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        try {
-            val drawingsDir = java.io.File(cacheDir, "drawings").apply { mkdirs() }
-            val outFile = java.io.File(drawingsDir, "handwriting_${System.currentTimeMillis()}.png")
-            java.io.FileOutputStream(outFile).use { fos ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            }
-
-            val imageUri = Uri.fromFile(outFile)
-            val startTimeMs = getGlobalPosition()
-            val sequenceDuration = getTotalSequenceDuration().coerceAtLeast(3000L)
-            val endTimeMs = (startTimeMs + 4000L).coerceAtMost(sequenceDuration)
-
-            val overlayOp = com.antoniopennino.thecut.models.EditOperation.AddImageOverlay(
-                imageUri = imageUri,
-                relativeX = 0.5f,
-                relativeY = 0.5f,
-                relativeWidth = 1.0f,
-                relativeHeight = 1.0f,
-                rotationAngle = 0f,
-                startTimeMs = startTimeMs,
-                endTimeMs = endTimeMs
-            )
-
-            viewModel.addOperation(overlayOp)
-            closeHandwritingMode()
-            Toast.makeText(this, R.string.str_toast_handwriting_added, Toast.LENGTH_SHORT).show()
-
-            viewModel.project.value?.let { renderTracks(it) }
-
-        } catch (e: Exception) {
-            Toast.makeText(this, getString(R.string.str_toast_handwriting_save_error, e.localizedMessage ?: ""), Toast.LENGTH_SHORT).show()
-        }
-    }
-
     @SuppressLint("InflateParams")
     private fun textAction() {
         if (isTextEditingActive) {
@@ -3037,8 +2846,8 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private fun closeActiveEditingModes() {
-        if (isHandwritingActive) {
-            closeHandwritingMode()
+        if (::handwritingDelegate.isInitialized && handwritingDelegate.isActive) {
+            handwritingDelegate.close()
         }
         if (isTextEditingActive) {
             draggableTextOverlay?.commitText()
