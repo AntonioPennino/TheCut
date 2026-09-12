@@ -3,7 +3,26 @@ package com.antoniopennino.thecut.utils
 import android.content.Context
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.TextureView
 import android.view.View
+import android.view.ViewGroup
+
+/**
+ * Depth-first search for the first [TextureView] in [viewGroup]'s hierarchy
+ * (e.g. the surface an ExoPlayer StyledPlayerView renders into). Returns null
+ * if none is found. Shared by the Activity and its delegates.
+ */
+fun findTextureView(viewGroup: ViewGroup): TextureView? {
+    for (i in 0 until viewGroup.childCount) {
+        val child = viewGroup.getChildAt(i)
+        if (child is TextureView) return child
+        if (child is ViewGroup) {
+            val tv = findTextureView(child)
+            if (tv != null) return tv
+        }
+    }
+    return null
+}
 
 /**
  * Checks whether haptic feedback is enabled in user settings.
