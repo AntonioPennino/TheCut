@@ -9,6 +9,7 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import com.antoniopennino.thecut.models.EditOperation
+import com.antoniopennino.thecut.utils.KeyframeInterpolator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -221,56 +222,6 @@ class ImageOverlayView @JvmOverloads constructor(
         }
     }
 
-    private fun interpolateKeyframes(
-        keyframes: List<EditOperation.KeyframePoint>,
-        timeMs: Long,
-        defaultValue: Float
-    ): Float {
-        if (keyframes.isEmpty()) return defaultValue
-        val sorted = keyframes.sortedBy { it.timeMs }
-        if (timeMs <= sorted.first().timeMs) {
-            return sorted.first().valueX
-        }
-        if (timeMs >= sorted.last().timeMs) {
-            return sorted.last().valueX
-        }
-        for (i in 0 until sorted.size - 1) {
-            val k1 = sorted[i]
-            val k2 = sorted[i + 1]
-            if (timeMs >= k1.timeMs && timeMs <= k2.timeMs) {
-                val progress = (timeMs - k1.timeMs).toFloat() / (k2.timeMs - k1.timeMs)
-                return k1.valueX + progress * (k2.valueX - k1.valueX)
-            }
-        }
-        return defaultValue
-    }
-
-    private fun interpolateKeyframePosition(
-        keyframes: List<EditOperation.KeyframePoint>,
-        timeMs: Long,
-        defaultX: Float,
-        defaultY: Float
-    ): Pair<Float, Float> {
-        if (keyframes.isEmpty()) return Pair(defaultX, defaultY)
-        val sorted = keyframes.sortedBy { it.timeMs }
-        if (timeMs <= sorted.first().timeMs) {
-            return Pair(sorted.first().valueX, sorted.first().valueY)
-        }
-        if (timeMs >= sorted.last().timeMs) {
-            return Pair(sorted.last().valueX, sorted.last().valueY)
-        }
-        for (i in 0 until sorted.size - 1) {
-            val k1 = sorted[i]
-            val k2 = sorted[i + 1]
-            if (timeMs >= k1.timeMs && timeMs <= k2.timeMs) {
-                val progress = (timeMs - k1.timeMs).toFloat() / (k2.timeMs - k1.timeMs)
-                val x = k1.valueX + progress * (k2.valueX - k1.valueX)
-                val y = k1.valueY + progress * (k2.valueY - k1.valueY)
-                return Pair(x, y)
-            }
-        }
-        return Pair(defaultX, defaultY)
-    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -292,12 +243,12 @@ class ImageOverlayView @JvmOverloads constructor(
 
             val relativeTimeMs = currentPositionMs - start
             val interpolatedPos = if (op.positionKeyframes.isNotEmpty()) {
-                interpolateKeyframePosition(op.positionKeyframes, relativeTimeMs, op.relativeX, op.relativeY)
+                KeyframeInterpolator.position(op.positionKeyframes, relativeTimeMs, op.relativeX, op.relativeY)
             } else {
                 Pair(op.relativeX, op.relativeY)
             }
             val interpolatedOpacity = if (op.opacityKeyframes.isNotEmpty()) {
-                interpolateKeyframes(op.opacityKeyframes, relativeTimeMs, op.opacity)
+                KeyframeInterpolator.value(op.opacityKeyframes, relativeTimeMs, op.opacity)
             } else {
                 op.opacity
             }
@@ -309,7 +260,7 @@ class ImageOverlayView @JvmOverloads constructor(
 
             if (isGif || isVideo) {
                 val speed = if (op.speedKeyframes.isNotEmpty()) {
-                    interpolateKeyframes(op.speedKeyframes, relativeTimeMs, 1.0f)
+                    KeyframeInterpolator.value(op.speedKeyframes, relativeTimeMs, 1.0f)
                 } else {
                     1.0f
                 }

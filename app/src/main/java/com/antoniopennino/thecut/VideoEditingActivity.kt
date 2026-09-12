@@ -14,6 +14,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import com.antoniopennino.thecut.utils.KeyframeInterpolator
 import com.antoniopennino.thecut.utils.setBounceClickListener
 import com.antoniopennino.thecut.utils.performHapticLight
 import com.antoniopennino.thecut.utils.performHapticClick
@@ -8487,7 +8488,7 @@ class VideoEditingActivity : AppCompatActivity() {
                             val currentList = op.opacityKeyframes.toMutableList()
                             val existingIndex = currentList.indexOfFirst { Math.abs(it.timeMs - relativeTimeMs) < 150L }
                             if (existingIndex != -1) currentList.removeAt(existingIndex) else {
-                                val currentOpacity = if (currentList.isNotEmpty()) interpolateKeyframes(currentList, relativeTimeMs, op.opacity) else op.opacity
+                                val currentOpacity = if (currentList.isNotEmpty()) KeyframeInterpolator.value(currentList, relativeTimeMs, op.opacity) else op.opacity
                                 currentList.add(EditOperation.KeyframePoint(relativeTimeMs, currentOpacity))
                             }
                             viewModel.updateOperation(op.copy(opacityKeyframes = currentList))
@@ -8496,7 +8497,7 @@ class VideoEditingActivity : AppCompatActivity() {
                             val currentList = op.speedKeyframes.toMutableList()
                             val existingIndex = currentList.indexOfFirst { Math.abs(it.timeMs - relativeTimeMs) < 150L }
                             if (existingIndex != -1) currentList.removeAt(existingIndex) else {
-                                val currentSpeed = if (currentList.isNotEmpty()) interpolateKeyframes(currentList, relativeTimeMs, 1.0f) else 1.0f
+                                val currentSpeed = if (currentList.isNotEmpty()) KeyframeInterpolator.value(currentList, relativeTimeMs, 1.0f) else 1.0f
                                 currentList.add(EditOperation.KeyframePoint(relativeTimeMs, currentSpeed))
                             }
                             viewModel.updateOperation(op.copy(speedKeyframes = currentList))
@@ -8555,7 +8556,7 @@ class VideoEditingActivity : AppCompatActivity() {
                             val currentList = op.opacityKeyframes.toMutableList()
                             val existingIndex = currentList.indexOfFirst { Math.abs(it.timeMs - relativeTimeMs) < 150L }
                             if (existingIndex != -1) currentList.removeAt(existingIndex) else {
-                                val currentOpacity = if (currentList.isNotEmpty()) interpolateKeyframes(currentList, relativeTimeMs, op.opacity) else op.opacity
+                                val currentOpacity = if (currentList.isNotEmpty()) KeyframeInterpolator.value(currentList, relativeTimeMs, op.opacity) else op.opacity
                                 currentList.add(EditOperation.KeyframePoint(relativeTimeMs, currentOpacity))
                             }
                             viewModel.updateOperation(op.copy(opacityKeyframes = currentList))
@@ -8821,12 +8822,12 @@ class VideoEditingActivity : AppCompatActivity() {
                     val start = op.startTimeMs ?: 0L
                     val relativeTimeMs = globalTimeMs - start
                     val interpolatedPos = if (op.positionKeyframes.isNotEmpty()) {
-                        interpolateKeyframePosition(op.positionKeyframes, relativeTimeMs, op.relativeX, op.relativeY)
+                        KeyframeInterpolator.position(op.positionKeyframes, relativeTimeMs, op.relativeX, op.relativeY)
                     } else {
                         Pair(op.relativeX, op.relativeY)
                     }
                     val interpolatedOpacity = if (op.opacityKeyframes.isNotEmpty()) {
-                        interpolateKeyframes(op.opacityKeyframes, relativeTimeMs, op.opacity)
+                        KeyframeInterpolator.value(op.opacityKeyframes, relativeTimeMs, op.opacity)
                     } else {
                         op.opacity
                     }
@@ -8851,7 +8852,7 @@ class VideoEditingActivity : AppCompatActivity() {
                         tvSliderValue?.text = "$progress%"
                     } else if (activeKeyframeProperty == "Speed") {
                         val speed = if (op.speedKeyframes.isNotEmpty()) {
-                            interpolateKeyframes(op.speedKeyframes, relativeTimeMs, 1.0f)
+                            KeyframeInterpolator.value(op.speedKeyframes, relativeTimeMs, 1.0f)
                         } else {
                             1.0f
                         }
@@ -8881,12 +8882,12 @@ class VideoEditingActivity : AppCompatActivity() {
                     val start = op.startTimeMs ?: 0L
                     val relativeTimeMs = globalTimeMs - start
                     val interpolatedPos = if (op.positionKeyframes.isNotEmpty()) {
-                        interpolateKeyframePosition(op.positionKeyframes, relativeTimeMs, op.relativeX ?: 0.5f, op.relativeY ?: 0.5f)
+                        KeyframeInterpolator.position(op.positionKeyframes, relativeTimeMs, op.relativeX ?: 0.5f, op.relativeY ?: 0.5f)
                     } else {
                         Pair(op.relativeX ?: 0.5f, op.relativeY ?: 0.5f)
                     }
                     val interpolatedOpacity = if (op.opacityKeyframes.isNotEmpty()) {
-                        interpolateKeyframes(op.opacityKeyframes, relativeTimeMs, op.opacity)
+                        KeyframeInterpolator.value(op.opacityKeyframes, relativeTimeMs, op.opacity)
                     } else {
                         op.opacity
                     }
@@ -8938,57 +8939,6 @@ class VideoEditingActivity : AppCompatActivity() {
             }
         }
         updateKeyframeActionButtonState(globalTimeMs)
-    }
-
-    private fun interpolateKeyframes(
-        keyframes: List<com.antoniopennino.thecut.models.EditOperation.KeyframePoint>,
-        timeMs: Long,
-        defaultValue: Float
-    ): Float {
-        if (keyframes.isEmpty()) return defaultValue
-        val sorted = keyframes.sortedBy { it.timeMs }
-        if (timeMs <= sorted.first().timeMs) {
-            return sorted.first().valueX
-        }
-        if (timeMs >= sorted.last().timeMs) {
-            return sorted.last().valueX
-        }
-        for (i in 0 until sorted.size - 1) {
-            val k1 = sorted[i]
-            val k2 = sorted[i + 1]
-            if (timeMs >= k1.timeMs && timeMs <= k2.timeMs) {
-                val progress = (timeMs - k1.timeMs).toFloat() / (k2.timeMs - k1.timeMs)
-                return k1.valueX + progress * (k2.valueX - k1.valueX)
-            }
-        }
-        return defaultValue
-    }
-
-    private fun interpolateKeyframePosition(
-        keyframes: List<com.antoniopennino.thecut.models.EditOperation.KeyframePoint>,
-        timeMs: Long,
-        defaultX: Float,
-        defaultY: Float
-    ): Pair<Float, Float> {
-        if (keyframes.isEmpty()) return Pair(defaultX, defaultY)
-        val sorted = keyframes.sortedBy { it.timeMs }
-        if (timeMs <= sorted.first().timeMs) {
-            return Pair(sorted.first().valueX, sorted.first().valueY)
-        }
-        if (timeMs >= sorted.last().timeMs) {
-            return Pair(sorted.last().valueX, sorted.last().valueY)
-        }
-        for (i in 0 until sorted.size - 1) {
-            val k1 = sorted[i]
-            val k2 = sorted[i + 1]
-            if (timeMs >= k1.timeMs && timeMs <= k2.timeMs) {
-                val progress = (timeMs - k1.timeMs).toFloat() / (k2.timeMs - k1.timeMs)
-                val x = k1.valueX + progress * (k2.valueX - k1.valueX)
-                val y = k1.valueY + progress * (k2.valueY - k1.valueY)
-                return Pair(x, y)
-            }
-        }
-        return Pair(defaultX, defaultY)
     }
 
     private fun showMaskBottomSheet() {
