@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.antoniopennino.thecut.R
+import com.antoniopennino.thecut.models.EditOperation
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import java.util.Locale
@@ -43,6 +44,13 @@ class ClipEffectsDelegate(
         fun applyTransition(index: Int, type: String, durationMs: Long)
         /** Number of transition slots between clips (chunks - 1). */
         fun getTransitionCount(): Int
+
+        /** Existing adjustment for [clipIndex], or null if none set. */
+        fun getExistingAdjust(clipIndex: Int): EditOperation.Adjust?
+        /** Persist [adjust] for [clipIndex]. */
+        fun setAdjust(clipIndex: Int, adjust: EditOperation.Adjust)
+        /** Apply the current color filter + [adjust] to the live player preview. */
+        fun applyAdjustPreview(clipIndex: Int, adjust: EditOperation.Adjust)
     }
 
     fun showColorFilters(clipIndex: Int) {
@@ -287,6 +295,172 @@ class ClipEffectsDelegate(
             for (i in 0 until transitionsCount) {
                 callbacks.applyTransition(i, activeTransitionType, activeDurationMs)
             }
+            callbacks.renderTracks()
+            bottomSheet.dismiss()
+        }
+
+        view.findViewById<View>(R.id.btnDone)?.setOnClickListener {
+            callbacks.renderTracks()
+            bottomSheet.dismiss()
+        }
+
+        bottomSheet.show()
+    }
+
+    fun showAdjust(clipIndex: Int) {
+        val bottomSheet = BottomSheetDialog(activity)
+        val view = activity.layoutInflater.inflate(R.layout.dialog_adjustments, null)
+        bottomSheet.setContentView(view)
+
+        val optionsList = view.findViewById<LinearLayout>(R.id.adjustOptionsList)
+        val slider = view.findViewById<Slider>(R.id.adjustSlider)
+        val valueLabel = view.findViewById<TextView>(R.id.adjustValueLabel)
+
+        var localAdjust = callbacks.getExistingAdjust(clipIndex) ?: EditOperation.Adjust(index = clipIndex)
+        var selectedOptionId = "brightness" // Default selection
+
+        val options = listOf(
+            Pair("reset", "Reset All"),
+            Pair("brightness", "Brightness"),
+            Pair("contrast", "Contrast"),
+            Pair("warmth", "Warmth"),
+            Pair("shadow", "Shadow"),
+            Pair("highlights", "Highlights"),
+            Pair("saturation", "Saturation"),
+            Pair("exposure", "Exposure"),
+            Pair("sharpen", "Sharpen"),
+            Pair("vignette", "Vignette")
+        )
+
+        val itemBgs = mutableMapOf<String, FrameLayout>()
+        val itemTvShorts = mutableMapOf<String, TextView>()
+        val itemTvNames = mutableMapOf<String, TextView>()
+
+        fun getValForOption(id: String): Int {
+            return when (id) {
+                "brightness" -> localAdjust.brightness
+                "contrast" -> localAdjust.contrast
+                "warmth" -> localAdjust.warmth
+                "shadow" -> localAdjust.shadow
+                "highlights" -> localAdjust.highlights
+                "saturation" -> localAdjust.saturation
+                "exposure" -> localAdjust.exposure
+                "sharpen" -> localAdjust.sharpen
+                "vignette" -> localAdjust.vignette
+                else -> 0
+            }
+        }
+
+        fun refreshSelectionStates() {
+            for ((id, bgFrame) in itemBgs) {
+                val tvName = itemTvNames[id]
+                val isSelected = (id == selectedOptionId)
+                val isModified = (id != "reset" && getValForOption(id) != 0)
+
+                if (isSelected) {
+                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_selected)
+                    bgFrame.foreground = ContextCompat.getDrawable(activity, R.drawable.bg_transition_border_selected)
+                    tvName?.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimary))
+                } else if (isModified) {
+                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
+                    bgFrame.foreground = ContextCompat.getDrawable(activity, R.drawable.bg_transition_border_selected)
+                    tvName?.setTextColor(ContextCompat.getColor(activity, R.color.textColor))
+                } else {
+                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
+                    bgFrame.foreground = null
+                    tvName?.setTextColor(ContextCompat.getColor(activity, R.color.textColor))
+                }
+            }
+        }
+
+        fun updateSliderForSelection() {
+            if (selectedOptionId == "reset") {
+                slider.visibility = View.INVISIBLE
+                valueLabel.text = activity.getString(R.string.str_reset_all)
+            } else {
+                slider.visibility = View.VISIBLE
+                val currentVal = getValForOption(selectedOptionId)
+                slider.value = currentVal.toFloat()
+                valueLabel.text = "${selectedOptionId.replaceFirstChar { it.uppercase() }}: $currentVal"
+            }
+        }
+
+        for ((id, displayName) in options) {
+            val itemView = activity.layoutInflater.inflate(R.layout.item_adjust_option, optionsList, false)
+            val tvName = itemView.findViewById<TextView>(R.id.adjustName)
+            val bg = itemView.findViewById<FrameLayout>(R.id.adjustIconBg)
+            val iconImage = itemView.findViewById<ImageView>(R.id.adjustIconImage)
+            val tvShort = itemView.findViewById<TextView>(R.id.adjustShortName)
+
+            itemBgs[id] = bg
+            itemTvShorts[id] = tvShort
+            itemTvNames[id] = tvName
+
+            tvName.text = displayName
+            bg.clipToOutline = true
+
+            val resName = "ic_${id.lowercase()}_24"
+            val resId = activity.resources.getIdentifier(resName, "drawable", activity.packageName)
+            if (resId != 0) {
+                iconImage.setImageResource(resId)
+                iconImage.visibility = View.VISIBLE
+                tvShort.visibility = View.GONE
+            } else {
+                iconImage.visibility = View.GONE
+                tvShort.visibility = View.VISIBLE
+                tvShort.text = displayName.substring(0, minOf(2, displayName.length)).uppercase()
+            }
+
+            itemView.setOnClickListener {
+                if (id == "reset") {
+                    localAdjust = EditOperation.Adjust(index = clipIndex)
+                    callbacks.setAdjust(clipIndex, localAdjust)
+                    callbacks.applyAdjustPreview(clipIndex, localAdjust)
+                    refreshSelectionStates()
+                    updateSliderForSelection()
+                } else {
+                    selectedOptionId = id
+                    refreshSelectionStates()
+                    updateSliderForSelection()
+                }
+            }
+
+            optionsList.addView(itemView)
+        }
+
+        slider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser && selectedOptionId != "reset_all") {
+                val intVal = value.toInt()
+                localAdjust = when (selectedOptionId) {
+                    "brightness" -> localAdjust.copy(brightness = intVal)
+                    "contrast" -> localAdjust.copy(contrast = intVal)
+                    "warmth" -> localAdjust.copy(warmth = intVal)
+                    "shadow" -> localAdjust.copy(shadow = intVal)
+                    "highlights" -> localAdjust.copy(highlights = intVal)
+                    "saturation" -> localAdjust.copy(saturation = intVal)
+                    "exposure" -> localAdjust.copy(exposure = intVal)
+                    "sharpen" -> localAdjust.copy(sharpen = intVal)
+                    "vignette" -> localAdjust.copy(vignette = intVal)
+                    else -> localAdjust
+                }
+
+                valueLabel.text = "${selectedOptionId.replaceFirstChar { it.uppercase() }}: $intVal"
+
+                callbacks.setAdjust(clipIndex, localAdjust)
+                callbacks.applyAdjustPreview(clipIndex, localAdjust)
+                refreshSelectionStates()
+            }
+        }
+
+        refreshSelectionStates()
+        updateSliderForSelection()
+
+        view.findViewById<View>(R.id.btnApplyToAll)?.setOnClickListener {
+            val chunkCount = callbacks.getChunkCount()
+            for (i in 0 until chunkCount) {
+                callbacks.setAdjust(i, localAdjust.copy(index = i))
+            }
+            callbacks.applyAdjustPreview(clipIndex, localAdjust)
             callbacks.renderTracks()
             bottomSheet.dismiss()
         }
