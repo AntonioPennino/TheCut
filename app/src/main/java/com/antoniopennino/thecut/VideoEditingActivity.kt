@@ -693,6 +693,28 @@ class VideoEditingActivity : AppCompatActivity() {
                 override fun renderTracks() {
                     viewModel.project.value?.let { renderTracks(it) }
                 }
+                override fun getExistingTransition(index: Int): Pair<String, Long>? {
+                    val op = viewModel.project.value?.operations
+                        ?.filterIsInstance<EditOperation.Transition>()
+                        ?.find { it.index == index } ?: return null
+                    return Pair(op.type, op.durationMs)
+                }
+                override fun applyTransition(index: Int, type: String, durationMs: Long) {
+                    val proj = viewModel.project.value ?: return
+                    val existing = proj.operations
+                        .filterIsInstance<EditOperation.Transition>()
+                        .find { it.index == index }
+                    if (type == "none") {
+                        if (existing != null) viewModel.removeOperation(existing.id)
+                    } else {
+                        if (existing != null) {
+                            viewModel.updateOperation(existing.copy(type = type, durationMs = durationMs))
+                        } else {
+                            viewModel.addTransitionOperation(index, type, durationMs)
+                        }
+                    }
+                }
+                override fun getTransitionCount(): Int = chunkDurationsMs.size - 1
             }
         )
         observeViewModelState()
@@ -6030,7 +6052,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
                 transitionViewsToLayout.add(Pair(transitionView, transParams))
                 transitionView.setOnClickListener {
-                    showTransitionDialog(index - 1)
+                    clipEffectsDelegate.showTransition(index - 1)
                 }
             }
 
@@ -6490,181 +6512,6 @@ class VideoEditingActivity : AppCompatActivity() {
             btnMute?.setImageResource(R.drawable.ic_volume_up_24)
             tvMuteLabel?.text = getString(R.string.str_mute)
         }
-    }
-
-    private fun showTransitionDialog(transitionIndex: Int) {
-        val bottomSheet = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_transitions, null)
-        bottomSheet.setContentView(view)
-
-        val transitionsList = view.findViewById<LinearLayout>(R.id.transitionsList)
-        val project = viewModel.project.value ?: return
-        val existingOp = project.operations.filterIsInstance<com.antoniopennino.thecut.models.EditOperation.Transition>().find { it.index == transitionIndex }
-        var activeTransitionType = existingOp?.type ?: "none"
-        var activeDurationMs = existingOp?.durationMs ?: 1000L
-
-        fun applyTransitionToIndex(idx: Int, transType: String, durationMs: Long = activeDurationMs) {
-            val proj = viewModel.project.value ?: return
-            val existing = proj.operations.filterIsInstance<com.antoniopennino.thecut.models.EditOperation.Transition>().find { it.index == idx }
-            if (transType == "none") {
-                if (existing != null) {
-                    viewModel.removeOperation(existing.id)
-                }
-            } else {
-                if (existing != null) {
-                    viewModel.updateOperation(existing.copy(type = transType, durationMs = durationMs))
-                } else {
-                    viewModel.addTransitionOperation(idx, transType, durationMs)
-                }
-            }
-        }
-
-        val sliderDuration = view.findViewById<com.google.android.material.slider.Slider>(R.id.sliderTransitionDuration)
-        val tvDurationVal = view.findViewById<TextView>(R.id.tvTransitionDurationValue)
-
-        val durationSec = (activeDurationMs / 1000.0f).coerceIn(0.1f, 3.0f)
-        sliderDuration?.value = (Math.round(durationSec * 10f) / 10f).coerceIn(0.1f, 3.0f)
-        tvDurationVal?.text = String.format(java.util.Locale.US, "%.1fs", durationSec)
-
-        sliderDuration?.addOnChangeListener { _, value, fromUser ->
-            activeDurationMs = (value * 1000f).toLong()
-            tvDurationVal?.text = String.format(java.util.Locale.US, "%.1fs", value)
-            if (fromUser && activeTransitionType != "none") {
-                applyTransitionToIndex(transitionIndex, activeTransitionType, activeDurationMs)
-            }
-        }
-
-        val transitions = listOf(
-            Pair("none", "None"),
-            Pair("fade", "Fade"),
-            Pair("fadeblack", "Fade Black"),
-            Pair("fadewhite", "Fade White"),
-            Pair("dissolve", "Dissolve"),
-            Pair("wipeleft", "Wipe L"),
-            Pair("wiperight", "Wipe R"),
-            Pair("wipeup", "Wipe Up"),
-            Pair("wipedown", "Wipe Down"),
-            Pair("slideleft", "Slide L"),
-            Pair("slideright", "Slide R"),
-            Pair("slideup", "Slide Up"),
-            Pair("slidedown", "Slide Down"),
-            Pair("coverleft", "Cover L"),
-            Pair("coverright", "Cover R"),
-            Pair("circlecrop", "Circle"),
-            Pair("rectcrop", "Box"),
-            Pair("zoomin", "Zoom In"),
-            Pair("pixelize", "Pixelize"),
-            Pair("hlslice", "H-Slice"),
-            Pair("vuslice", "V-Slice")
-        )
-
-        val itemBgs = mutableMapOf<String, FrameLayout>()
-        val itemTvShorts = mutableMapOf<String, TextView>()
-
-        fun refreshSelectionStates() {
-            for ((typeKey, bgFrame) in itemBgs) {
-                val tvShort = itemTvShorts[typeKey]
-                val isSelected = (typeKey == activeTransitionType)
-                if (isSelected) {
-                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_selected)
-                    bgFrame.foreground = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_transition_border_selected)
-                    tvShort?.setTextColor(android.graphics.Color.WHITE)
-                } else {
-                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
-                    bgFrame.foreground = null
-                    tvShort?.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.textColor))
-                }
-            }
-        }
-
-        for ((type, name) in transitions) {
-            val itemView = layoutInflater.inflate(R.layout.item_transition_option, transitionsList, false)
-            val tvName = itemView.findViewById<TextView>(R.id.transitionName)
-            val tvShort = itemView.findViewById<TextView>(R.id.transitionShortName)
-            val bg = itemView.findViewById<FrameLayout>(R.id.transitionIconBg)
-
-            itemBgs[type] = bg
-            itemTvShorts[type] = tvShort
-
-            tvName.text = name
-            bg.clipToOutline = true
-
-            val ivPreview = itemView.findViewById<ImageView>(R.id.transitionPreviewImage)
-            val startDrawable = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.trans_frame_start)
-            val endDrawable = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.trans_frame_end)
-
-            if (startDrawable != null && endDrawable != null) {
-                if (type == "none") {
-                    ivPreview.setImageDrawable(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_close_24))
-                    ivPreview.visibility = View.VISIBLE
-                    tvShort.visibility = View.GONE
-                } else {
-                    val animation = android.graphics.drawable.AnimationDrawable().apply {
-                        isOneShot = false
-                    }
-                    val frame1Res = resources.getIdentifier("trans_preview_${type}_1", "drawable", packageName)
-                    val frame2Res = resources.getIdentifier("trans_preview_${type}_2", "drawable", packageName)
-                    val frame3Res = resources.getIdentifier("trans_preview_${type}_3", "drawable", packageName)
-
-                    if (frame1Res != 0 && frame2Res != 0 && frame3Res != 0) {
-                        val f1 = androidx.core.content.ContextCompat.getDrawable(this, frame1Res)
-                        val f2 = androidx.core.content.ContextCompat.getDrawable(this, frame2Res)
-                        val f3 = androidx.core.content.ContextCompat.getDrawable(this, frame3Res)
-
-                        if (f1 != null && f2 != null && f3 != null) {
-                            animation.addFrame(startDrawable, 600)
-                            animation.addFrame(f1, 100)
-                            animation.addFrame(f2, 100)
-                            animation.addFrame(f3, 100)
-                            animation.addFrame(endDrawable, 600)
-
-                            ivPreview.setImageDrawable(animation)
-                            ivPreview.visibility = View.VISIBLE
-                            tvShort.visibility = View.GONE
-                            ivPreview.post { animation.start() }
-                        } else {
-                            ivPreview.visibility = View.GONE
-                            tvShort.visibility = View.VISIBLE
-                            tvShort.text = name.substring(0, minOf(2, name.length)).uppercase()
-                        }
-                    } else {
-                        ivPreview.visibility = View.GONE
-                        tvShort.visibility = View.VISIBLE
-                        tvShort.text = name.substring(0, minOf(2, name.length)).uppercase()
-                    }
-                }
-            } else {
-                ivPreview.visibility = View.GONE
-                tvShort.visibility = View.VISIBLE
-                tvShort.text = name.substring(0, minOf(2, name.length)).uppercase()
-            }
-
-            itemView.setOnClickListener {
-                activeTransitionType = type
-                refreshSelectionStates()
-                applyTransitionToIndex(transitionIndex, type, activeDurationMs)
-            }
-
-            transitionsList.addView(itemView)
-        }
-
-        refreshSelectionStates()
-
-        view.findViewById<View>(R.id.btnApplyToAll)?.setOnClickListener {
-            val transitionsCount = chunkDurationsMs.size - 1
-            for (i in 0 until transitionsCount) {
-                applyTransitionToIndex(i, activeTransitionType, activeDurationMs)
-            }
-            viewModel.project.value?.let { renderTracks(it) }
-            bottomSheet.dismiss()
-        }
-
-        view.findViewById<View>(R.id.btnDone)?.setOnClickListener {
-            viewModel.project.value?.let { renderTracks(it) }
-            bottomSheet.dismiss()
-        }
-
-        bottomSheet.show()
     }
 
     private fun setupCustomSeeker() {
