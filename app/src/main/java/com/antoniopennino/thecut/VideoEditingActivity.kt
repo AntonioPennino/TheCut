@@ -118,6 +118,7 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var exportDelegate: com.antoniopennino.thecut.delegates.ExportDelegate
     private lateinit var handwritingDelegate: com.antoniopennino.thecut.delegates.HandwritingDelegate
     private lateinit var snapshotDelegate: com.antoniopennino.thecut.delegates.SnapshotDelegate
+    private lateinit var voiceOverDelegate: com.antoniopennino.thecut.delegates.VoiceOverDelegate
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -477,16 +478,11 @@ class VideoEditingActivity : AppCompatActivity() {
     
     private var isInitialFitDone = false
 
-    private var mediaRecorder: android.media.MediaRecorder? = null
-    private var isRecordingVoiceOver = false
-    private var voiceOverFile: File? = null
-    private var voiceOverStartTimeMs = 0L
-
     private val requestRecordAudioPermissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            showVoiceOverDialog()
+            voiceOverDelegate.showDialog()
         } else {
             Toast.makeText(this, R.string.toast_microphone_permission_required, Toast.LENGTH_SHORT).show()
         }
@@ -652,6 +648,34 @@ class VideoEditingActivity : AppCompatActivity() {
             callbacks = object : com.antoniopennino.thecut.delegates.SnapshotDelegate.Callbacks {
                 override fun onRequestCloseOtherModes() = closeActiveEditingModes()
                 override fun getPlayerView(): android.view.ViewGroup = playerView
+            }
+        )
+        voiceOverDelegate = com.antoniopennino.thecut.delegates.VoiceOverDelegate(
+            activity = this,
+            callbacks = object : com.antoniopennino.thecut.delegates.VoiceOverDelegate.Callbacks {
+                override fun getGlobalPosition(): Long = this@VideoEditingActivity.getGlobalPosition()
+                override fun onRecordingStarted() {
+                    if (::player.isInitialized) {
+                        player.play()
+                        btnPlayPause.setImageResource(R.drawable.ic_pause_24)
+                    }
+                }
+                override fun onRecordingStopped() {
+                    if (::player.isInitialized) {
+                        player.pause()
+                        btnPlayPause.setImageResource(R.drawable.ic_play_24)
+                    }
+                }
+                override fun onVoiceOverRecorded(audioUri: Uri, startTimeMs: Long, durationMs: Long) {
+                    viewModel.addBackgroundAudioOperation(
+                        audioUri = audioUri,
+                        startTimeMs = startTimeMs,
+                        endTimeMs = startTimeMs + durationMs,
+                        internalStartMs = 0L,
+                        internalEndMs = durationMs
+                    )
+                }
+                override fun clearActiveToolButton() = setActiveToolButton(-1)
             }
         )
         observeViewModelState()
@@ -2810,160 +2834,10 @@ class VideoEditingActivity : AppCompatActivity() {
                 android.Manifest.permission.RECORD_AUDIO
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            showVoiceOverDialog()
+            voiceOverDelegate.showDialog()
         } else {
             requestRecordAudioPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
         }
-    }
-
-    private fun showVoiceOverDialog() {
-        val bottomSheet = BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_voice_over, null)
-        bottomSheet.setContentView(view)
-
-        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseVoiceOver)
-        val btnToggle = view.findViewById<ImageButton>(R.id.btnToggleRecording)
-        val tvStatus = view.findViewById<TextView>(R.id.tvRecordingStatus)
-        val ripple1 = view.findViewById<View>(R.id.ripple1)
-        val ripple2 = view.findViewById<View>(R.id.ripple2)
-        
-        isRecordingVoiceOver = false
-
-        val scaleX1 = android.animation.ObjectAnimator.ofFloat(ripple1, "scaleX", 1f, 1.8f)
-        val scaleY1 = android.animation.ObjectAnimator.ofFloat(ripple1, "scaleY", 1f, 1.8f)
-        val alpha1 = android.animation.ObjectAnimator.ofFloat(ripple1, "alpha", 0.6f, 0f)
-        
-        val scaleX2 = android.animation.ObjectAnimator.ofFloat(ripple2, "scaleX", 1f, 1.8f)
-        val scaleY2 = android.animation.ObjectAnimator.ofFloat(ripple2, "scaleY", 1f, 1.8f)
-        val alpha2 = android.animation.ObjectAnimator.ofFloat(ripple2, "alpha", 0.6f, 0f)
-
-        scaleX1.repeatCount = android.animation.ValueAnimator.INFINITE
-        scaleY1.repeatCount = android.animation.ValueAnimator.INFINITE
-        alpha1.repeatCount = android.animation.ValueAnimator.INFINITE
-        
-        scaleX2.repeatCount = android.animation.ValueAnimator.INFINITE
-        scaleY2.repeatCount = android.animation.ValueAnimator.INFINITE
-        alpha2.repeatCount = android.animation.ValueAnimator.INFINITE
-        
-        val rippleAnimator = android.animation.AnimatorSet().apply {
-            playTogether(scaleX1, scaleY1, alpha1)
-            duration = 1500
-        }
-        val rippleAnimator2 = android.animation.AnimatorSet().apply {
-            playTogether(scaleX2, scaleY2, alpha2)
-            duration = 1500
-            startDelay = 750
-        }
-
-        btnToggle.setBounceClickListener {
-            if (!isRecordingVoiceOver) {
-                // Start Recording
-                voiceOverFile = File(cacheDir, "voice_over_${System.currentTimeMillis()}.m4a")
-                try {
-                    mediaRecorder = android.media.MediaRecorder().apply {
-                        setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
-                        setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
-                        setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
-                        setOutputFile(voiceOverFile?.absolutePath)
-                        prepare()
-                        start()
-                    }
-                    
-                    isRecordingVoiceOver = true
-                    tvStatus.text = getString(R.string.str_recording_tap_stop)
-                    btnToggle.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF4081"))
-                    
-                    rippleAnimator.start()
-                    rippleAnimator2.start()
-                    
-                    // Play video while recording
-                    voiceOverStartTimeMs = getGlobalPosition()
-                    if (::player.isInitialized) {
-                        player.play()
-                        btnPlayPause.setImageResource(R.drawable.ic_pause_24)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Toast.makeText(this@VideoEditingActivity, R.string.toast_failed_to_start_recording, Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                // Stop Recording
-                try {
-                    mediaRecorder?.stop()
-                    mediaRecorder?.release()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                mediaRecorder = null
-                isRecordingVoiceOver = false
-                
-                rippleAnimator.cancel()
-                rippleAnimator2.cancel()
-                ripple1.alpha = 0f
-                ripple2.alpha = 0f
-                ripple1.scaleX = 1f
-                ripple1.scaleY = 1f
-                ripple2.scaleX = 1f
-                ripple2.scaleY = 1f
-                
-                // Pause video
-                if (::player.isInitialized) {
-                    player.pause()
-                    btnPlayPause.setImageResource(R.drawable.ic_play_24)
-                }
-                
-                tvStatus.text = getString(R.string.str_recording_tap_start)
-                btnToggle.backgroundTintList = null // Reset tint
-                
-                // Add to audio layer
-                voiceOverFile?.let { file ->
-                    if (file.exists()) {
-                        var durationMs = 3000L
-                        try {
-                            val retriever = android.media.MediaMetadataRetriever()
-                            retriever.setDataSource(file.absolutePath)
-                            val timeStr = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
-                            if (timeStr != null) {
-                                durationMs = timeStr.toLong()
-                            }
-                            retriever.release()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                        
-                        viewModel.addBackgroundAudioOperation(
-                            audioUri = Uri.fromFile(file),
-                            startTimeMs = voiceOverStartTimeMs,
-                            endTimeMs = voiceOverStartTimeMs + durationMs,
-                            internalStartMs = 0L,
-                            internalEndMs = durationMs
-                        )
-                    }
-                }
-                bottomSheet.dismiss()
-            }
-        }
-
-        btnClose.setBounceClickListener {
-            bottomSheet.dismiss()
-        }
-        
-        bottomSheet.setOnDismissListener {
-            rippleAnimator.cancel()
-            rippleAnimator2.cancel()
-            if (isRecordingVoiceOver) {
-                try { mediaRecorder?.stop(); mediaRecorder?.release() } catch(e: Exception) {}
-                mediaRecorder = null
-                isRecordingVoiceOver = false
-                if (::player.isInitialized) {
-                    player.pause()
-                    btnPlayPause.setImageResource(R.drawable.ic_play_24)
-                }
-            }
-            setActiveToolButton(-1)
-        }
-
-        bottomSheet.show()
     }
 
     private fun subtitlesAction() {
