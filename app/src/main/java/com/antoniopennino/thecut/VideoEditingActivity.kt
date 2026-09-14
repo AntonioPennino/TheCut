@@ -619,8 +619,6 @@ class VideoEditingActivity : AppCompatActivity() {
             callbacks = object : com.antoniopennino.thecut.delegates.HandwritingDelegate.Callbacks {
                 override fun onRequestCloseOtherModes() = closeActiveEditingModes()
                 override fun setActiveToolButton(viewId: Int) = this@VideoEditingActivity.setActiveToolButton(viewId)
-                override fun showCustomColorPicker(currentHex: String, onPicked: (String) -> Unit) =
-                    this@VideoEditingActivity.showCustomColorPicker(currentHex, onPicked)
                 override fun pausePlayback() {
                     if (::player.isInitialized && player.isPlaying) {
                         player.pause()
@@ -2060,7 +2058,7 @@ class VideoEditingActivity : AppCompatActivity() {
                     exitCanvasBackgroundEditingMode()
                 }
                 toolbar.findViewById<View>(R.id.btnBackgroundColor)?.setBounceClickListener {
-                    showCustomColorPicker("#000000") { hexColor ->
+                    com.antoniopennino.thecut.dialogs.ColorPickerDialog.show(this, "#000000") { hexColor ->
                         viewModel.updateCanvasBackgroundOperation(
                             type = EditOperation.CanvasBackground.BackgroundType.COLOR,
                             colorHex = hexColor
@@ -7967,34 +7965,6 @@ class VideoEditingActivity : AppCompatActivity() {
                 draggableImageOverlay?.setChromaKey(originalColor, originalSimilarity)
             }
             draggableImageOverlay?.isColorPickingMode = false
-        }
-        bottomSheet.show()
-    }
-
-    private fun showCustomColorPicker(initialHex: String, onColorPicked: (String) -> Unit) {
-        val bottomSheet = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_custom_color_picker, null)
-        bottomSheet.setContentView(view)
-
-        val preview = view.findViewById<View>(R.id.colorPickerPreview)
-        val hsvPicker = view.findViewById<com.antoniopennino.thecut.customviews.HSVColorPickerView>(R.id.hsvColorPicker)
-        val btnCancel = view.findViewById<Button>(R.id.btnCancelCustomColor)
-        val btnApply = view.findViewById<Button>(R.id.btnApplyCustomColor)
-
-        var currentColor = android.graphics.Color.parseColor(initialHex)
-        preview.setBackgroundColor(currentColor)
-
-        hsvPicker.setColor(currentColor)
-        hsvPicker.onColorChanged = { newColor ->
-            currentColor = newColor
-            preview.setBackgroundColor(currentColor)
-        }
-
-        btnCancel.setOnClickListener { bottomSheet.dismiss() }
-        btnApply.setOnClickListener {
-            val hex = String.format("#%06X", 0xFFFFFF and currentColor)
-            onColorPicked(hex)
-            bottomSheet.dismiss()
         }
         bottomSheet.show()
     }

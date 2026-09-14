@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.antoniopennino.thecut.R
 import com.antoniopennino.thecut.customviews.BrushSizeDotView
 import com.antoniopennino.thecut.customviews.HandwritingCanvasView
+import com.antoniopennino.thecut.dialogs.ColorPickerDialog
 import com.antoniopennino.thecut.utils.setBounceClickListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
@@ -39,8 +40,6 @@ class HandwritingDelegate(
         fun onRequestCloseOtherModes()
         /** Highlight (or clear, with -1) the given tool button. */
         fun setActiveToolButton(viewId: Int)
-        /** Show the app's custom color picker seeded with [currentHex]. */
-        fun showCustomColorPicker(currentHex: String, onPicked: (String) -> Unit)
         /** Pause playback when entering drawing mode. */
         fun pausePlayback()
         /** Current on-screen video rectangle used to size the canvas. */
@@ -183,7 +182,7 @@ class HandwritingDelegate(
         }
 
         btnCustomColor?.setBounceClickListener {
-            callbacks.showCustomColorPicker(selectedHex) { customHex ->
+            ColorPickerDialog.show(activity, selectedHex) { customHex ->
                 updateColorSelection(customHex)
             }
         }
