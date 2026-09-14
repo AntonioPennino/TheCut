@@ -119,6 +119,7 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var handwritingDelegate: com.antoniopennino.thecut.delegates.HandwritingDelegate
     private lateinit var snapshotDelegate: com.antoniopennino.thecut.delegates.SnapshotDelegate
     private lateinit var voiceOverDelegate: com.antoniopennino.thecut.delegates.VoiceOverDelegate
+    private lateinit var clipEffectsDelegate: com.antoniopennino.thecut.delegates.ClipEffectsDelegate
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -676,6 +677,22 @@ class VideoEditingActivity : AppCompatActivity() {
                     )
                 }
                 override fun clearActiveToolButton() = setActiveToolButton(-1)
+            }
+        )
+        clipEffectsDelegate = com.antoniopennino.thecut.delegates.ClipEffectsDelegate(
+            activity = this,
+            callbacks = object : com.antoniopennino.thecut.delegates.ClipEffectsDelegate.Callbacks {
+                override fun getExistingColorFilterName(clipIndex: Int): String? =
+                    viewModel.project.value?.operations
+                        ?.filterIsInstance<EditOperation.ColorFilter>()
+                        ?.find { it.index == clipIndex }?.filterName
+                override fun setColorFilter(clipIndex: Int, filterName: String) =
+                    viewModel.setColorFilter(clipIndex, filterName)
+                override fun applyColorFilterPreview(filterName: String) = applyColorFilterToPlayer(filterName)
+                override fun getChunkCount(): Int = chunkDurationsMs.size
+                override fun renderTracks() {
+                    viewModel.project.value?.let { renderTracks(it) }
+                }
             }
         )
         observeViewModelState()
@@ -1646,7 +1663,7 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
                 toolbar.findViewById<ImageButton>(R.id.btnVideoFilter)?.setBounceClickListener {
                     selectedVideoIndex?.let { index ->
-                        showColorFilterSelectionDialog(index)
+                        clipEffectsDelegate.showColorFilters(index)
                     }
                 }
                 toolbar.findViewById<ImageButton>(R.id.btnVideoMask)?.setBounceClickListener {
@@ -6473,104 +6490,6 @@ class VideoEditingActivity : AppCompatActivity() {
             btnMute?.setImageResource(R.drawable.ic_volume_up_24)
             tvMuteLabel?.text = getString(R.string.str_mute)
         }
-    }
-
-    private fun showColorFilterSelectionDialog(clipIndex: Int) {
-        val bottomSheet = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_color_filters, null)
-        bottomSheet.setContentView(view)
-
-        val filtersList = view.findViewById<LinearLayout>(R.id.colorFiltersList)
-        val project = viewModel.project.value ?: return
-        val existingOp = project.operations.filterIsInstance<com.antoniopennino.thecut.models.EditOperation.ColorFilter>().find { it.index == clipIndex }
-        var activeFilterName = existingOp?.filterName ?: "none"
-
-        val filters = listOf(
-            Pair("none", "None"),
-            Pair("vintage", "Vintage"),
-            Pair("warm", "Warm"),
-            Pair("cool", "Cool"),
-            Pair("contrast", "Contrast"),
-            Pair("monochrome", "B&W"),
-            Pair("vignette", "Vignette"),
-            Pair("negative", "Negative"),
-            Pair("crossprocess", "Cross P")
-        )
-
-        val itemBgs = mutableMapOf<String, FrameLayout>()
-        val itemTvShorts = mutableMapOf<String, TextView>()
-
-        fun refreshSelectionStates() {
-            for ((id, bgFrame) in itemBgs) {
-                val tvShort = itemTvShorts[id]
-                val isSelected = (id == activeFilterName)
-                if (isSelected) {
-                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_selected)
-                    bgFrame.foreground = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_transition_border_selected)
-                    tvShort?.setTextColor(android.graphics.Color.WHITE)
-                } else {
-                    bgFrame.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
-                    bgFrame.foreground = null
-                    tvShort?.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.textColor))
-                }
-            }
-        }
-
-        for ((filterId, displayName) in filters) {
-            val itemView = layoutInflater.inflate(R.layout.item_color_filter_option, filtersList, false)
-            val tvName = itemView.findViewById<TextView>(R.id.filterName)
-            val bg = itemView.findViewById<FrameLayout>(R.id.filterIconBg)
-            val previewImage = itemView.findViewById<ImageView>(R.id.filterPreviewImage)
-            val tvShort = itemView.findViewById<TextView>(R.id.filterShortName)
-
-            itemBgs[filterId] = bg
-            itemTvShorts[filterId] = tvShort
-
-            tvName.text = displayName
-            bg.clipToOutline = true
-
-            if (filterId == "none") {
-                previewImage.visibility = View.GONE
-                tvShort.visibility = View.VISIBLE
-                tvShort.text = "✖"
-            } else {
-                previewImage.visibility = View.VISIBLE
-                tvShort.visibility = View.GONE
-                val resName = "filter_preview_${filterId.lowercase()}"
-                val resId = resources.getIdentifier(resName, "drawable", packageName)
-                if (resId != 0) {
-                    previewImage.setImageResource(resId)
-                }
-            }
-
-            itemView.setOnClickListener {
-                activeFilterName = filterId
-                refreshSelectionStates()
-                viewModel.setColorFilter(clipIndex, filterId)
-                applyColorFilterToPlayer(filterId)
-            }
-            
-            filtersList.addView(itemView)
-        }
-
-        refreshSelectionStates()
-
-        view.findViewById<View>(R.id.btnApplyToAll)?.setOnClickListener {
-            val chunkCount = chunkDurationsMs.size
-            for (i in 0 until chunkCount) {
-                viewModel.setColorFilter(i, activeFilterName)
-            }
-            applyColorFilterToPlayer(activeFilterName)
-            viewModel.project.value?.let { renderTracks(it) }
-            bottomSheet.dismiss()
-        }
-
-        view.findViewById<View>(R.id.btnDone)?.setOnClickListener {
-            viewModel.project.value?.let { renderTracks(it) }
-            bottomSheet.dismiss()
-        }
-
-        bottomSheet.show()
     }
 
     private fun showTransitionDialog(transitionIndex: Int) {
