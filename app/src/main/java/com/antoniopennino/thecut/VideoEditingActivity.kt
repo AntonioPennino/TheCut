@@ -121,6 +121,7 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var voiceOverDelegate: com.antoniopennino.thecut.delegates.VoiceOverDelegate
     private lateinit var clipEffectsDelegate: com.antoniopennino.thecut.delegates.ClipEffectsDelegate
     private lateinit var fontManagerDelegate: com.antoniopennino.thecut.delegates.FontManagerDelegate
+    private val maskEditorDelegate by lazy { com.antoniopennino.thecut.delegates.MaskEditorDelegate(this) }
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -7986,209 +7987,60 @@ class VideoEditingActivity : AppCompatActivity() {
     }
 
     private fun showMaskBottomSheet() {
-        val bottomSheet = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.bottom_sheet_mask, null)
-        bottomSheet.setContentView(view)
-
-        val btnNone = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskNone)
-        val btnSplit = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskSplit)
-        val btnShutter = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskShutter)
-        val btnEllipse = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskEllipse)
-        val btnRectangle = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskRectangle)
-        val btnHeart = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskHeart)
-        val btnStar = view.findViewById<android.widget.LinearLayout>(R.id.btnMaskStar)
-
-        val bgNone = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskNone)
-        val bgSplit = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskSplit)
-        val bgShutter = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskShutter)
-        val bgEllipse = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskEllipse)
-        val bgRectangle = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskRectangle)
-        val bgHeart = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskHeart)
-        val bgStar = view.findViewById<android.widget.FrameLayout>(R.id.bgMaskStar)
-
-        val imgNone = view.findViewById<android.widget.ImageView>(R.id.imgMaskNone)
-        val imgSplit = view.findViewById<android.widget.ImageView>(R.id.imgMaskSplit)
-        val imgShutter = view.findViewById<android.widget.ImageView>(R.id.imgMaskShutter)
-        val imgEllipse = view.findViewById<android.widget.ImageView>(R.id.imgMaskEllipse)
-        val imgRectangle = view.findViewById<android.widget.ImageView>(R.id.imgMaskRectangle)
-        val imgHeart = view.findViewById<android.widget.ImageView>(R.id.imgMaskHeart)
-        val imgStar = view.findViewById<android.widget.ImageView>(R.id.imgMaskStar)
-
-        val switchInvert = view.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchInvertMask)
-        val sliderFeather = view.findViewById<com.google.android.material.slider.Slider>(R.id.sliderMaskFeather)
-        val sliderSize = view.findViewById<com.google.android.material.slider.Slider>(R.id.sliderMaskSize)
-        val sliderRotation = view.findViewById<com.google.android.material.slider.Slider>(R.id.sliderMaskRotation)
-        
-        val tvFeatherValue = view.findViewById<TextView>(R.id.tvFeatherValue)
-        val tvSizeValue = view.findViewById<TextView>(R.id.tvSizeValue)
-        val tvRotationValue = view.findViewById<TextView>(R.id.tvRotationValue)
-        val btnResetRotation = view.findViewById<TextView>(R.id.btnResetRotation)
-        
-        val btnResetMask = view.findViewById<View>(R.id.btnResetMask)
-        val btnDoneMask = view.findViewById<View>(R.id.btnDoneMaskSheet)
-
         val isMainVideo = selectedVideoIndex != null && videoEditingToolbar?.visibility == View.VISIBLE
-        
-        var currentMask = if (isMainVideo) {
-            val idx = selectedVideoIndex!!
-            val items = getSequenceItems()
-            if (idx >= 0 && idx < items.size) items[idx].maskConfig else com.antoniopennino.thecut.models.EditOperation.MaskConfig()
-        } else {
-            draggableImageOverlay?.maskConfig ?: com.antoniopennino.thecut.models.EditOperation.MaskConfig()
-        }
-        
-        switchInvert.isChecked = currentMask.isInverted
-        sliderFeather?.value = currentMask.feather.coerceIn(0f, 100f)
-        tvFeatherValue?.text = "${currentMask.feather.toInt()}%"
-
-        val avgScale = ((currentMask.relativeWidth + currentMask.relativeHeight) / 2f * 200f).coerceIn(10f, 200f)
-        sliderSize?.value = avgScale
-        tvSizeValue?.text = "${avgScale.toInt()}%"
-
-        sliderRotation?.value = currentMask.rotationAngle.coerceIn(-180f, 180f)
-        tvRotationValue?.text = "${currentMask.rotationAngle.toInt()}°"
-
-        fun highlightShape(selectedShape: com.antoniopennino.thecut.models.EditOperation.MaskShape) {
-            val shapeMap = mapOf(
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.NONE to Pair(bgNone, imgNone),
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.SPLIT to Pair(bgSplit, imgSplit),
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.SHUTTER to Pair(bgShutter, imgShutter),
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.ELLIPSE to Pair(bgEllipse, imgEllipse),
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.RECTANGLE to Pair(bgRectangle, imgRectangle),
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.HEART to Pair(bgHeart, imgHeart),
-                com.antoniopennino.thecut.models.EditOperation.MaskShape.STAR to Pair(bgStar, imgStar)
-            )
-            val activeColor = android.graphics.Color.WHITE
-            val inactiveColor = getColor(R.color.toolTextInactive)
-
-            for ((shape, views) in shapeMap) {
-                val bg = views.first ?: continue
-                val img = views.second ?: continue
-                if (shape == selectedShape) {
-                    bg.setBackgroundResource(R.drawable.bg_aspect_ratio_selected)
-                    img.setColorFilter(activeColor)
-                } else {
-                    bg.setBackgroundResource(R.drawable.bg_aspect_ratio_item)
-                    img.setColorFilter(inactiveColor)
+        val target = if (isMainVideo) {
+            object : com.antoniopennino.thecut.delegates.MaskEditorDelegate.MaskTarget {
+                override val initialMask: EditOperation.MaskConfig = run {
+                    val idx = selectedVideoIndex!!
+                    val items = getSequenceItems()
+                    if (idx >= 0 && idx < items.size) items[idx].maskConfig else EditOperation.MaskConfig()
+                }
+                override fun onEditingStarted(mask: EditOperation.MaskConfig) {
+                    videoMaskOverlayView?.maskConfig = mask
+                    videoMaskOverlayView?.isEditingMode = true
+                }
+                override fun preview(mask: EditOperation.MaskConfig) {
+                    videoMaskOverlayView?.maskConfig = mask
+                    videoMaskOverlayView?.isEditingMode = true
+                    videoMaskOverlayView?.invalidate()
+                    mainVideoMaskContainer?.maskConfig = mask
+                    videoMaskOverlayView?.onMaskChanged?.invoke(mask)
+                }
+                override fun commit(mask: EditOperation.MaskConfig) {
+                    videoMaskOverlayView?.isEditingMode = false
+                    selectedVideoIndex?.let { index ->
+                        viewModel.updateMergeItemMask(index, mask)
+                        mainVideoMaskContainer?.maskConfig = mask
+                    }
                 }
             }
-        }
-
-        highlightShape(currentMask.shape)
-
-        if (isMainVideo) {
-            videoMaskOverlayView?.maskConfig = currentMask
-            videoMaskOverlayView?.isEditingMode = true
         } else {
-            draggableImageOverlay?.isMaskEditingMode = currentMask.shape != com.antoniopennino.thecut.models.EditOperation.MaskShape.NONE
-        }
-
-        fun applyMaskToView(newMask: com.antoniopennino.thecut.models.EditOperation.MaskConfig) {
-            currentMask = newMask
-            if (isMainVideo) {
-                videoMaskOverlayView?.maskConfig = newMask
-                videoMaskOverlayView?.isEditingMode = true
-                videoMaskOverlayView?.invalidate()
-                mainVideoMaskContainer?.maskConfig = newMask
-                videoMaskOverlayView?.onMaskChanged?.invoke(newMask)
-            } else {
-                draggableImageOverlay?.maskConfig = newMask
-                draggableImageOverlay?.isMaskEditingMode = newMask.shape != com.antoniopennino.thecut.models.EditOperation.MaskShape.NONE
-                draggableImageOverlay?.invalidate()
-                draggableImageOverlay?.onMaskChanged?.invoke(newMask)
-            }
-        }
-
-        fun updateMaskShape(shape: com.antoniopennino.thecut.models.EditOperation.MaskShape) {
-            val newMask = currentMask.copy(shape = shape)
-            applyMaskToView(newMask)
-            highlightShape(shape)
-        }
-
-        btnNone?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.NONE) }
-        btnSplit?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.SPLIT) }
-        btnShutter?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.SHUTTER) }
-        btnEllipse?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.ELLIPSE) }
-        btnRectangle?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.RECTANGLE) }
-        btnHeart?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.HEART) }
-        btnStar?.setOnClickListener { updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.STAR) }
-
-        sliderFeather?.addOnChangeListener { _, value, _ ->
-            tvFeatherValue?.text = "${value.toInt()}%"
-            val newMask = currentMask.copy(feather = value)
-            applyMaskToView(newMask)
-        }
-
-        sliderSize?.addOnChangeListener { _, value, _ ->
-            tvSizeValue?.text = "${value.toInt()}%"
-            val relScale = value / 200f
-            val newMask = currentMask.copy(relativeWidth = relScale, relativeHeight = relScale)
-            applyMaskToView(newMask)
-        }
-
-        sliderRotation?.addOnChangeListener { _, value, _ ->
-            tvRotationValue?.text = "${value.toInt()}°"
-            val newMask = currentMask.copy(rotationAngle = value)
-            applyMaskToView(newMask)
-        }
-
-        btnResetRotation?.setOnClickListener {
-            sliderRotation?.value = 0f
-        }
-
-        switchInvert.setOnCheckedChangeListener { _, isChecked ->
-            val newMask = currentMask.copy(isInverted = isChecked)
-            applyMaskToView(newMask)
-        }
-
-        btnResetMask?.setOnClickListener {
-            val resetMask = com.antoniopennino.thecut.models.EditOperation.MaskConfig()
-            switchInvert.isChecked = false
-            sliderFeather?.value = 0f
-            sliderSize?.value = 100f
-            sliderRotation?.value = 0f
-            tvFeatherValue?.text = "0%"
-            tvSizeValue?.text = "100%"
-            tvRotationValue?.text = "0°"
-            updateMaskShape(com.antoniopennino.thecut.models.EditOperation.MaskShape.NONE)
-        }
-        
-        bottomSheet.setOnDismissListener {
-            if (isMainVideo) {
-                videoMaskOverlayView?.isEditingMode = false
-                selectedVideoIndex?.let { index ->
-                    viewModel.updateMergeItemMask(index, currentMask)
-                    mainVideoMaskContainer?.maskConfig = currentMask
+            object : com.antoniopennino.thecut.delegates.MaskEditorDelegate.MaskTarget {
+                override val initialMask: EditOperation.MaskConfig =
+                    draggableImageOverlay?.maskConfig ?: EditOperation.MaskConfig()
+                override fun onEditingStarted(mask: EditOperation.MaskConfig) {
+                    draggableImageOverlay?.isMaskEditingMode = mask.shape != EditOperation.MaskShape.NONE
                 }
-            } else {
-                draggableImageOverlay?.isMaskEditingMode = false
-                draggableImageOverlay?.maskConfig = currentMask
-                draggableImageOverlay?.invalidate()
-                val selectedId = viewModel.selectedOperationId.value
-                if (selectedId != null) {
-                    val op = viewModel.project.value?.operations?.find { (it as? EditOperation.AddImageOverlay)?.id == selectedId } as? EditOperation.AddImageOverlay
+                override fun preview(mask: EditOperation.MaskConfig) {
+                    draggableImageOverlay?.maskConfig = mask
+                    draggableImageOverlay?.isMaskEditingMode = mask.shape != EditOperation.MaskShape.NONE
+                    draggableImageOverlay?.invalidate()
+                    draggableImageOverlay?.onMaskChanged?.invoke(mask)
+                }
+                override fun commit(mask: EditOperation.MaskConfig) {
+                    draggableImageOverlay?.isMaskEditingMode = false
+                    draggableImageOverlay?.maskConfig = mask
+                    draggableImageOverlay?.invalidate()
+                    val selectedId = viewModel.selectedOperationId.value ?: return
+                    val op = viewModel.project.value?.operations
+                        ?.find { (it as? EditOperation.AddImageOverlay)?.id == selectedId } as? EditOperation.AddImageOverlay
                     if (op != null) {
-                        viewModel.updateOperation(op.copy(maskConfig = currentMask))
+                        viewModel.updateOperation(op.copy(maskConfig = mask))
                     }
                 }
             }
         }
-        
-        btnDoneMask?.setOnClickListener {
-            bottomSheet.dismiss()
-        }
-
-        bottomSheet.setCanceledOnTouchOutside(false)
-        bottomSheet.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        bottomSheet.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-
-        bottomSheet.show()
-
-        val touchOutside = bottomSheet.findViewById<View>(com.google.android.material.R.id.touch_outside)
-        touchOutside?.setOnTouchListener { _, event ->
-            findViewById<View>(android.R.id.content).dispatchTouchEvent(event)
-            true
-        }
+        maskEditorDelegate.show(target)
     }
 
     companion object {
