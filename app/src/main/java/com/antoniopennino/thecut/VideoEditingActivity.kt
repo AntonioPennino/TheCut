@@ -5604,6 +5604,26 @@ class VideoEditingActivity : AppCompatActivity() {
             return
         }
 
+        rebuildPlayerSource(sequenceItems, totalSequenceDuration)
+
+        applyTimelineWidths(totalSequenceDuration)
+
+        renderSequenceTrack(project, sequenceItems)
+
+        renderOverlayTracks(project, totalSequenceDuration)
+
+        renderAudioTracks(project, totalSequenceDuration)
+
+        renderKeyframeTracks(project, totalSequenceDuration)
+
+        if (activeExtractionCount == 0 && isImportLoading) {
+            isImportLoading = false
+            loadingScreen.visibility = View.GONE
+        }
+        updateTimelineAddButtonPosition()
+    }
+
+    private fun rebuildPlayerSource(sequenceItems: List<com.antoniopennino.thecut.models.EditOperation.MergeItem>, totalSequenceDuration: Long) {
         val mediaSourceFactory = com.google.android.exoplayer2.source.DefaultMediaSourceFactory(this)
         
         val exoAudioOps = viewModel.project.value?.operations?.filterIsInstance<com.antoniopennino.thecut.models.EditOperation.AddBackgroundAudio>() ?: emptyList()
@@ -5753,8 +5773,9 @@ class VideoEditingActivity : AppCompatActivity() {
         
         seekToGlobalPosition(globalPos, force = true)
         if (wasPlaying) player.play()
+    }
 
-
+    private fun applyTimelineWidths(totalSequenceDuration: Long) {
         val timelineWidth = (totalSequenceDuration * pixelsPerMs).toInt()
 
         // Set explicit widths for ruler and track containers
@@ -5777,7 +5798,9 @@ class VideoEditingActivity : AppCompatActivity() {
         audioTrackContainer.layoutParams = audioTrackContainer.layoutParams.apply {
             width = timelineWidth
         }
+    }
 
+    private fun renderSequenceTrack(project: VideoProject, sequenceItems: List<com.antoniopennino.thecut.models.EditOperation.MergeItem>) {
         // Render Sequence Track
         sequenceTrackContainer.clipChildren = false
         sequenceTrackContainer.clipToPadding = false
@@ -6039,7 +6062,9 @@ class VideoEditingActivity : AppCompatActivity() {
         if (activeRenderJobs.isNotEmpty()) {
             // Keep track if needed but don't block
         }
+    }
 
+    private fun renderOverlayTracks(project: VideoProject, totalSequenceDuration: Long) {
         // Combined Text and Image tracks (Overlays) in Z-order stack
         textTrackContainer.removeAllViews()
         imageTrackContainer.removeAllViews()
@@ -6145,7 +6170,9 @@ class VideoEditingActivity : AppCompatActivity() {
         } else {
             textTrackContainer.visibility = View.GONE
         }
+    }
 
+    private fun renderAudioTracks(project: VideoProject, totalSequenceDuration: Long) {
         // Audio tracks
         audioTrackContainer.removeAllViews()
         val audioOps = project.operations.filterIsInstance<EditOperation.AddBackgroundAudio>()
@@ -6221,7 +6248,9 @@ class VideoEditingActivity : AppCompatActivity() {
         } else {
             audioTrackContainer.visibility = View.GONE
         }
+    }
 
+    private fun renderKeyframeTracks(project: VideoProject, totalSequenceDuration: Long) {
         // Keyframe cues tracks
         val keyframeContainer = findViewById<android.widget.LinearLayout>(R.id.keyframeTrackContainer)
         keyframeContainer?.removeAllViews()
@@ -6279,12 +6308,6 @@ class VideoEditingActivity : AppCompatActivity() {
         } else {
             keyframeContainer?.visibility = View.GONE
         }
-
-        if (activeExtractionCount == 0 && isImportLoading) {
-            isImportLoading = false
-            loadingScreen.visibility = View.GONE
-        }
-        updateTimelineAddButtonPosition()
     }
 
     private fun updateTimelineAddButtonPosition() {
