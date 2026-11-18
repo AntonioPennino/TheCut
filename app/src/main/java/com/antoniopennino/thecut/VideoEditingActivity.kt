@@ -120,6 +120,7 @@ class VideoEditingActivity : AppCompatActivity() {
     private lateinit var snapshotDelegate: com.antoniopennino.thecut.delegates.SnapshotDelegate
     private lateinit var voiceOverDelegate: com.antoniopennino.thecut.delegates.VoiceOverDelegate
     private lateinit var clipEffectsDelegate: com.antoniopennino.thecut.delegates.ClipEffectsDelegate
+    private lateinit var fontManagerDelegate: com.antoniopennino.thecut.delegates.FontManagerDelegate
     private val isTimelineExpanded: Boolean
         get() = if (::timelineController.isInitialized) timelineController.isTimelineExpanded else false
 
@@ -284,7 +285,7 @@ class VideoEditingActivity : AppCompatActivity() {
         }
 
         btnSelectFont.setBounceClickListener {
-            showFontManagerBottomSheet { selectedFont ->
+            fontManagerDelegate.show { selectedFont ->
                 tvSelectedFontName?.text = selectedFont.name
                 draggableTextOverlay?.setFontPath(selectedFont.path)
             }
@@ -306,7 +307,7 @@ class VideoEditingActivity : AppCompatActivity() {
         }
 
         btnSelectSubtitleFont.setBounceClickListener {
-            showFontManagerBottomSheet { selectedFont ->
+            fontManagerDelegate.show { selectedFont ->
                 tvSelectedSubtitleFontName?.text = selectedFont.name
                 val currentSubOp = viewModel.project.value?.operations?.find { it is EditOperation.AddSubtitles } as? EditOperation.AddSubtitles
                 if (currentSubOp != null) {
@@ -314,126 +315,6 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun showFontManagerBottomSheet(onFontSelected: ((com.antoniopennino.thecut.utils.FontItem) -> Unit)? = null) {
-        val bottomSheet = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.dialog_font_manager, null)
-        bottomSheet.setContentView(view)
-
-        val btnClose = view.findViewById<ImageButton>(R.id.btnCloseFontManager)
-        val btnImport = view.findViewById<Button>(R.id.btnImportFont)
-        val rvFonts = view.findViewById<RecyclerView>(R.id.rvFonts)
-        val tvEmpty = view.findViewById<TextView>(R.id.tvEmptyFonts)
-
-        btnClose?.setBounceClickListener {
-            bottomSheet.dismiss()
-        }
-
-        fun refreshFontList() {
-            val allFonts = com.antoniopennino.thecut.utils.FontManager.getAllFonts(this, fontFilePath)
-            if (allFonts.isEmpty()) {
-                tvEmpty?.visibility = View.VISIBLE
-                rvFonts?.visibility = View.GONE
-            } else {
-                tvEmpty?.visibility = View.GONE
-                rvFonts?.visibility = View.VISIBLE
-
-                rvFonts?.layoutManager = LinearLayoutManager(this)
-                val currentPath = draggableTextOverlay?.currentFontPath
-                rvFonts?.adapter = FontManagerAdapter(
-                    fonts = allFonts,
-                    selectedPath = currentPath,
-                    onSelect = { fontItem ->
-                        onFontSelected?.invoke(fontItem)
-                        draggableTextOverlay?.setFontPath(fontItem.path)
-                        textEditingToolbar?.findViewById<View>(R.id.formatSettingsContainer)?.let { setupTextFontSelector(it) }
-                        setupSubtitleFontSelector(subtitlesEditingToolbar)
-                        bottomSheet.dismiss()
-                    },
-                    onDelete = { fontItem ->
-                        MaterialAlertDialogBuilder(this)
-                            .setTitle("Delete Font")
-                            .setMessage("Are you sure you want to delete '${fontItem.name}'?")
-                            .setPositiveButton("Delete") { _, _ ->
-                                if (com.antoniopennino.thecut.utils.FontManager.deleteCustomFont(this, fontItem.path)) {
-                                    Toast.makeText(this, R.string.str_toast_font_deleted, Toast.LENGTH_SHORT).show()
-                                    refreshFontList()
-                                    textEditingToolbar?.findViewById<View>(R.id.formatSettingsContainer)?.let { setupTextFontSelector(it) }
-                                    setupSubtitleFontSelector(subtitlesEditingToolbar)
-                                } else {
-                                    Toast.makeText(this, R.string.str_toast_font_delete_failed, Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                            .setNegativeButton("Cancel", null)
-                            .show()
-                    }
-                )
-            }
-        }
-
-        btnImport?.setBounceClickListener {
-            activeFontSelectionCallback = { importedFont ->
-                onFontSelected?.invoke(importedFont)
-                draggableTextOverlay?.setFontPath(importedFont.path)
-                refreshFontList()
-            }
-            importFontLauncher.launch(arrayOf("font/ttf", "font/otf", "application/x-font-ttf", "application/x-font-opentype", "*/*"))
-        }
-
-        refreshFontList()
-        bottomSheet.show()
-    }
-
-    private class FontManagerAdapter(
-        private val fonts: List<com.antoniopennino.thecut.utils.FontItem>,
-        private val selectedPath: String?,
-        private val onSelect: (com.antoniopennino.thecut.utils.FontItem) -> Unit,
-        private val onDelete: (com.antoniopennino.thecut.utils.FontItem) -> Unit
-    ) : RecyclerView.Adapter<FontManagerAdapter.FontViewHolder>() {
-
-        class FontViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val tvName: TextView = view.findViewById(R.id.tvFontName)
-            val tvPreview: TextView = view.findViewById(R.id.tvFontPreview)
-            val tvBadge: TextView = view.findViewById(R.id.tvFontBadge)
-            val ivSelected: ImageView = view.findViewById(R.id.ivFontSelected)
-            val btnDelete: ImageButton = view.findViewById(R.id.btnDeleteFont)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FontViewHolder {
-            val view = android.view.LayoutInflater.from(parent.context).inflate(R.layout.item_font_manager, parent, false)
-            return FontViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: FontViewHolder, position: Int) {
-            val font = fonts[position]
-            holder.tvName.text = font.name
-            holder.tvPreview.text = "Aa The quick brown fox 123"
-            if (font.typeface != null) {
-                holder.tvPreview.typeface = font.typeface
-            } else {
-                holder.tvPreview.typeface = android.graphics.Typeface.DEFAULT
-            }
-
-            if (font.isCustom) {
-                holder.tvBadge.visibility = View.VISIBLE
-                holder.tvBadge.text = "Custom"
-                holder.btnDelete.visibility = View.VISIBLE
-                holder.btnDelete.setOnClickListener { onDelete(font) }
-            } else {
-                holder.tvBadge.visibility = View.GONE
-                holder.btnDelete.visibility = View.GONE
-            }
-
-            val isSelected = selectedPath != null && font.path == selectedPath
-            holder.ivSelected.visibility = if (isSelected) View.VISIBLE else View.GONE
-
-            holder.itemView.setOnClickListener {
-                onSelect(font)
-            }
-        }
-
-        override fun getItemCount() = fonts.size
     }
 
     // Cache for frame extraction
@@ -738,6 +619,24 @@ class VideoEditingActivity : AppCompatActivity() {
                         ?.filterIsInstance<EditOperation.ColorFilter>()
                         ?.find { it.index == clipIndex }?.filterName ?: "none"
                     applyColorFilterAndAdjustToPlayer(filterName, adjust)
+                }
+            }
+        )
+        fontManagerDelegate = com.antoniopennino.thecut.delegates.FontManagerDelegate(
+            activity = this,
+            callbacks = object : com.antoniopennino.thecut.delegates.FontManagerDelegate.Callbacks {
+                override fun getBundledFontPath(): String? = fontFilePath
+                override fun getCurrentFontPath(): String? = draggableTextOverlay?.currentFontPath
+                override fun applyFontToTextOverlay(path: String) {
+                    draggableTextOverlay?.setFontPath(path)
+                }
+                override fun refreshFontSelectors() {
+                    textEditingToolbar?.findViewById<View>(R.id.formatSettingsContainer)?.let { setupTextFontSelector(it) }
+                    setupSubtitleFontSelector(subtitlesEditingToolbar)
+                }
+                override fun launchFontImport(onImported: (com.antoniopennino.thecut.utils.FontItem) -> Unit) {
+                    activeFontSelectionCallback = onImported
+                    importFontLauncher.launch(arrayOf("font/ttf", "font/otf", "application/x-font-ttf", "application/x-font-opentype", "*/*"))
                 }
             }
         )
