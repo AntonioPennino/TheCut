@@ -900,6 +900,10 @@ class VideoEditingActivity : AppCompatActivity() {
                     reparentCanvasContainer(targetContainer)
                 }
                 override fun dpToPx(dp: Int): Int = dp.dpToPx()
+                override fun onKeyframeTrackClicked(operationId: String, isText: Boolean) {
+                    viewModel.selectOperation(operationId)
+                    enterKeyframeEditingMode(isText)
+                }
             }
         )
         silenceCutDelegate = com.antoniopennino.thecut.delegates.SilenceCutDelegate(
@@ -5606,7 +5610,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
         rebuildPlayerSource(sequenceItems, totalSequenceDuration)
 
-        applyTimelineWidths(totalSequenceDuration)
+        timelineController.applyTimelineWidths(totalSequenceDuration)
 
         renderSequenceTrack(project, sequenceItems)
 
@@ -5614,7 +5618,7 @@ class VideoEditingActivity : AppCompatActivity() {
 
         renderAudioTracks(project, totalSequenceDuration)
 
-        renderKeyframeTracks(project, totalSequenceDuration)
+        timelineController.renderKeyframeTracks(project.operations, totalSequenceDuration)
 
         if (activeExtractionCount == 0 && isImportLoading) {
             isImportLoading = false
@@ -5773,31 +5777,6 @@ class VideoEditingActivity : AppCompatActivity() {
         
         seekToGlobalPosition(globalPos, force = true)
         if (wasPlaying) player.play()
-    }
-
-    private fun applyTimelineWidths(totalSequenceDuration: Long) {
-        val timelineWidth = (totalSequenceDuration * pixelsPerMs).toInt()
-
-        // Set explicit widths for ruler and track containers
-        timeRulerView.layoutParams = timeRulerView.layoutParams.apply {
-            width = timelineWidth
-        }
-        timeRulerView.setVideoDuration(totalSequenceDuration)
-
-        customVideoSeeker.setVideoDuration(totalSequenceDuration)
-
-        sequenceTrackContainer.layoutParams = sequenceTrackContainer.layoutParams.apply {
-            width = timelineWidth
-        }
-        textTrackContainer.layoutParams = textTrackContainer.layoutParams.apply {
-            width = timelineWidth
-        }
-        imageTrackContainer.layoutParams = imageTrackContainer.layoutParams.apply {
-            width = timelineWidth
-        }
-        audioTrackContainer.layoutParams = audioTrackContainer.layoutParams.apply {
-            width = timelineWidth
-        }
     }
 
     private fun renderSequenceTrack(project: VideoProject, sequenceItems: List<com.antoniopennino.thecut.models.EditOperation.MergeItem>) {
@@ -6247,66 +6226,6 @@ class VideoEditingActivity : AppCompatActivity() {
             }
         } else {
             audioTrackContainer.visibility = View.GONE
-        }
-    }
-
-    private fun renderKeyframeTracks(project: VideoProject, totalSequenceDuration: Long) {
-        // Keyframe cues tracks
-        val keyframeContainer = findViewById<android.widget.LinearLayout>(R.id.keyframeTrackContainer)
-        keyframeContainer?.removeAllViews()
-        var hasKeyframeTracks = false
-        for (op in project.operations) {
-            val keyframes = mutableListOf<Long>()
-            var startTimeMs = 0L
-            var endTimeMs = totalSequenceDuration
-            if (op is com.antoniopennino.thecut.models.EditOperation.AddText) {
-                keyframes.addAll(op.positionKeyframes.map { it.timeMs })
-                keyframes.addAll(op.opacityKeyframes.map { it.timeMs })
-                startTimeMs = op.startTimeMs ?: 0L
-                endTimeMs = op.endTimeMs ?: totalSequenceDuration
-            } else if (op is com.antoniopennino.thecut.models.EditOperation.AddImageOverlay) {
-                keyframes.addAll(op.positionKeyframes.map { it.timeMs })
-                keyframes.addAll(op.opacityKeyframes.map { it.timeMs })
-                keyframes.addAll(op.speedKeyframes.map { it.timeMs })
-                keyframes.addAll(op.maskConfig.positionKeyframes.map { it.timeMs })
-                keyframes.addAll(op.maskConfig.sizeKeyframes.map { it.timeMs })
-                keyframes.addAll(op.maskConfig.rotationKeyframes.map { it.timeMs })
-                keyframes.addAll(op.maskConfig.featherKeyframes.map { it.timeMs })
-                startTimeMs = op.startTimeMs ?: 0L
-                endTimeMs = op.endTimeMs ?: totalSequenceDuration
-            }
-            
-            val distinctKeyframes = keyframes.distinct()
-            if (distinctKeyframes.isNotEmpty()) {
-                hasKeyframeTracks = true
-                val trackView = com.antoniopennino.thecut.customviews.TrackTrimView(this).apply {
-                    layoutParams = android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 24.dpToPx()).apply {
-                        topMargin = 4.dpToPx()
-                    }
-                    trackColor = android.graphics.Color.parseColor("#44FFFFFF") // Semi-transparent background
-                    trackLabel = ""
-                    trackIcon = null
-                    trackThumbnail = null
-                    this.keyframes = distinctKeyframes
-                    maxDurationMs = totalSequenceDuration
-                    activeStartMs = startTimeMs
-                    activeEndMs = endTimeMs
-                    customMsPerPixel = 1.0f / pixelsPerMs
-                    setRange(totalSequenceDuration, startTimeMs, endTimeMs)
-                    
-                    onTrackClicked = {
-                        viewModel.selectOperation(op.id)
-                        enterKeyframeEditingMode(op is com.antoniopennino.thecut.models.EditOperation.AddText)
-                    }
-                }
-                keyframeContainer?.addView(trackView)
-            }
-        }
-        
-        if (hasKeyframeTracks) {
-            keyframeContainer?.visibility = View.VISIBLE
-        } else {
-            keyframeContainer?.visibility = View.GONE
         }
     }
 

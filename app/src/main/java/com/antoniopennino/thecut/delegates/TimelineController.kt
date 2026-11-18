@@ -10,6 +10,11 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import com.antoniopennino.thecut.R
+import com.antoniopennino.thecut.customviews.CustomVideoSeeker
+import com.antoniopennino.thecut.customviews.TimeRulerView
+import com.antoniopennino.thecut.customviews.TrackTrimView
+import com.antoniopennino.thecut.models.EditOperation
+import com.antoniopennino.thecut.utils.KeyframeCues
 
 /**
  * Delegate responsible for timeline scaling, zooming, expansion modes
@@ -27,6 +32,8 @@ class TimelineController(
         fun onCanvasLayoutUpdateNeeded()
         fun reparentCanvas(targetContainer: ViewGroup)
         fun dpToPx(dp: Int): Int
+        /** A keyframe cue track was tapped: select the operation and enter keyframe editing. */
+        fun onKeyframeTrackClicked(operationId: String, isText: Boolean)
     }
 
     enum class ZoomMode { FIT, MEDIUM, PRECISION }
@@ -172,5 +179,60 @@ class TimelineController(
         player.post {
             callbacks.onCanvasLayoutUpdateNeeded()
         }
+    }
+
+    /** Size the ruler and every track container to the full sequence width at the current zoom. */
+    fun applyTimelineWidths(totalSequenceDuration: Long) {
+        val timelineWidth = (totalSequenceDuration * pixelsPerMs).toInt()
+
+        rootView.findViewById<TimeRulerView>(R.id.timeRulerView)?.let { ruler ->
+            ruler.layoutParams = ruler.layoutParams.apply { width = timelineWidth }
+            ruler.setVideoDuration(totalSequenceDuration)
+        }
+        rootView.findViewById<CustomVideoSeeker>(R.id.customVideoSeeker)?.setVideoDuration(totalSequenceDuration)
+
+        for (id in TRACK_CONTAINER_IDS) {
+            val container = rootView.findViewById<View>(id) ?: continue
+            container.layoutParams = container.layoutParams.apply { width = timelineWidth }
+        }
+    }
+
+    /** Draw one cue strip per overlay that has keyframes; hide the lane when there are none. */
+    fun renderKeyframeTracks(operations: List<EditOperation>, totalSequenceDuration: Long) {
+        val keyframeContainer = rootView.findViewById<LinearLayout>(R.id.keyframeTrackContainer)
+        keyframeContainer?.removeAllViews()
+        val tracks = KeyframeCues.collect(operations, totalSequenceDuration)
+        for (track in tracks) {
+            val trackView = TrackTrimView(context).apply {
+                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, callbacks.dpToPx(24)).apply {
+                    topMargin = callbacks.dpToPx(4)
+                }
+                trackColor = android.graphics.Color.parseColor("#44FFFFFF") // Semi-transparent background
+                trackLabel = ""
+                trackIcon = null
+                trackThumbnail = null
+                keyframes = track.cueTimesMs
+                maxDurationMs = totalSequenceDuration
+                activeStartMs = track.startMs
+                activeEndMs = track.endMs
+                customMsPerPixel = 1.0f / pixelsPerMs
+                setRange(totalSequenceDuration, track.startMs, track.endMs)
+
+                onTrackClicked = {
+                    callbacks.onKeyframeTrackClicked(track.operationId, track.isText)
+                }
+            }
+            keyframeContainer?.addView(trackView)
+        }
+        keyframeContainer?.visibility = if (tracks.isNotEmpty()) View.VISIBLE else View.GONE
+    }
+
+    companion object {
+        private val TRACK_CONTAINER_IDS = intArrayOf(
+            R.id.sequenceTrackContainer,
+            R.id.textTrackContainer,
+            R.id.imageTrackContainer,
+            R.id.audioTrackContainer
+        )
     }
 }
