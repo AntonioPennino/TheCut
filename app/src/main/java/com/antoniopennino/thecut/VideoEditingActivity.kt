@@ -1017,6 +1017,30 @@ class VideoEditingActivity : AppCompatActivity() {
                 }
             }
         )
+        setupTimelineInteractions()
+        setupPreviewOverlays()
+        setupTextEditingToolbar()
+        setupDraggableImageOverlay()
+        setupMaskAndCropOverlays()
+        setupImageEditingToolbar()
+        setupVideoEditingToolbar()
+        setupSpeedEditingToolbar()
+        setupAudioEditingToolbar()
+        setupCropEditingToolbar()
+        setupSubtitlesEditingToolbar()
+        setupBackgroundEditingToolbar()
+        setupKeyframeEditingToolbar()
+        setupTopBarAndToolButtons()
+        setupHistoryAndSaveButtons()
+
+        try {
+            lottieAnimationView.playAnimation()
+        } catch (e: Exception) {
+            Log.e("LottieError", "Error loading Lottie animation: ${e.message}")
+        }
+    }
+
+    private fun setupTimelineInteractions() {
         btnTimelineAdd = findViewById(R.id.btnTimelineAdd)
         
         emptyProjectState = findViewById(R.id.emptyProjectState)
@@ -1121,7 +1145,9 @@ class VideoEditingActivity : AppCompatActivity() {
                 false
             }
         }
+    }
 
+    private fun setupPreviewOverlays() {
         textOverlayView = try {
             findViewById<com.antoniopennino.thecut.customviews.TextOverlayView>(R.id.textOverlayView)?.also { overlay ->
                 overlay.onSubtitlePositionChanged = { relX, relY ->
@@ -1231,7 +1257,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "DraggableTextOverlayView not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupTextEditingToolbar() {
         textEditingToolbar = try {
             findViewById<View>(R.id.textEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnTextCancel)?.setBounceClickListener {
@@ -1360,7 +1388,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Text editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupDraggableImageOverlay() {
         draggableImageOverlay = try {
             findViewById<DraggableImageOverlayView>(R.id.draggableImageOverlay)?.also { overlay ->
                 overlay.isSnappingEnabled = isMagnetEnabled
@@ -1477,6 +1507,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "DraggableImageOverlayView not found: ${e.message}")
             null
         }
+    }
+
+    private fun setupMaskAndCropOverlays() {
         mainVideoMaskContainer = findViewById(R.id.mainVideoMaskContainer)
         videoMaskOverlayView = try {
             findViewById<com.antoniopennino.thecut.customviews.VideoMaskOverlayView>(R.id.videoMaskOverlayView)?.also { overlay ->
@@ -1536,7 +1569,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "CropOverlayView not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupImageEditingToolbar() {
         imageEditingToolbar = try {
             findViewById<View>(R.id.imageEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnImageCancel)?.setBounceClickListener {
@@ -1627,7 +1662,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Image editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupVideoEditingToolbar() {
         videoEditingToolbar = try {
             findViewById<View>(R.id.videoEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnVideoCancel)?.setBounceClickListener {
@@ -1725,7 +1762,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Video editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupSpeedEditingToolbar() {
         speedEditingToolbar = try {
             findViewById<View>(R.id.speedEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnCloseSpeedSheet)?.setBounceClickListener {
@@ -1851,7 +1890,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Speed editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupAudioEditingToolbar() {
         audioEditingToolbar = try {
             findViewById<View>(R.id.audioEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnAudioDone)?.setBounceClickListener {
@@ -2006,7 +2047,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Audio editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupCropEditingToolbar() {
         cropEditingToolbar = try {
             findViewById<View>(R.id.cropEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnCloseSheet)?.setBounceClickListener {
@@ -2082,7 +2125,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Crop editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupSubtitlesEditingToolbar() {
         subtitlesEditingToolbar = try {
             findViewById<View>(R.id.subtitlesEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnCloseSubtitlesSheet)?.setBounceClickListener {
@@ -2135,7 +2180,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Subtitles editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupBackgroundEditingToolbar() {
         backgroundEditingToolbar = try {
             findViewById<View>(R.id.backgroundEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<View>(R.id.btnBackFromBackground)?.setBounceClickListener {
@@ -2168,7 +2215,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Background editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupKeyframeEditingToolbar() {
         keyframeEditingToolbar = try {
             findViewById<View>(R.id.keyframeEditingToolbar)?.also { toolbar ->
                 toolbar.findViewById<ImageButton>(R.id.btnKeyframeCancel)?.setBounceClickListener {
@@ -2196,7 +2245,9 @@ class VideoEditingActivity : AppCompatActivity() {
             Log.w(TAG, "Keyframe editing toolbar not found: ${e.message}")
             null
         }
+    }
 
+    private fun setupTopBarAndToolButtons() {
         findViewById<ImageButton>(R.id.btnHome)?.setBounceClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
@@ -2257,7 +2308,9 @@ class VideoEditingActivity : AppCompatActivity() {
             setActiveToolButton(R.id.btnCanvasBackground)
             canvasBackgroundAction()
         }
+    }
 
+    private fun setupHistoryAndSaveButtons() {
         try {
             btnUndo = findViewById(R.id.btnUndo)
             btnRedo = findViewById(R.id.btnRedo)
@@ -2299,12 +2352,6 @@ class VideoEditingActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.d(TAG, "Undo/Redo/Preview buttons not found in layout (optional)")
-        }
-
-        try {
-            lottieAnimationView.playAnimation()
-        } catch (e: Exception) {
-            Log.e("LottieError", "Error loading Lottie animation: ${e.message}")
         }
     }
 
